@@ -1,0 +1,29 @@
+package com.ksr.crms.controller;
+
+import com.ksr.crms.dto.DashboardDTO;
+import com.ksr.crms.service.DashboardService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/dashboard")
+@Tag(name = "Dashboard API", description = "Dashboard statistics endpoints")
+public class DashboardController {
+
+    private final DashboardService dashboardService;
+
+    public DashboardController(DashboardService dashboardService) {
+        this.dashboardService = dashboardService;
+    }
+
+    @GetMapping("/stats")
+    @Operation(summary = "Get dashboard statistics")
+    public ResponseEntity<DashboardDTO> getDashboardStats() {
+        DashboardDTO stats = dashboardService.getDashboardStats();
+        return ResponseEntity.ok(stats);
+    }
+}
