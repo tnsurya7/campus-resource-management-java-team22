@@ -8,7 +8,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "resources")
+@Table(name = "resources", indexes = {
+    @Index(name = "idx_type_status", columnList = "type, status")
+})
 public class Resource {
 
     @Id
@@ -30,6 +32,11 @@ public class Resource {
     @Column(nullable = false)
     private Status status = Status.AVAILABLE;
 
+    @Column(nullable = false)
+    private Boolean deleted = false;
+
+    private LocalDateTime deletedAt;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -46,12 +53,15 @@ public class Resource {
     public Resource() {
     }
 
-    public Resource(Long id, String name, Type type, Integer capacity, Status status, LocalDateTime createdAt) {
+    public Resource(Long id, String name, Type type, Integer capacity, Status status, Boolean deleted, 
+                    LocalDateTime deletedAt, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
         this.type = type;
         this.capacity = capacity;
         this.status = status;
+        this.deleted = deleted;
+        this.deletedAt = deletedAt;
         this.createdAt = createdAt;
     }
 
@@ -102,5 +112,21 @@ public class Resource {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
     }
 }

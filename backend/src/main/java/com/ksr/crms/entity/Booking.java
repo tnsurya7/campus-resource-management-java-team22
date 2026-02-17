@@ -7,7 +7,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "bookings")
+@Table(name = "bookings", indexes = {
+    @Index(name = "idx_booking_date_resource_timeslot", columnList = "booking_date, resource_id, time_slot"),
+    @Index(name = "idx_user_id", columnList = "user_id"),
+    @Index(name = "idx_resource_id", columnList = "resource_id")
+})
 public class Booking {
 
     @Id
@@ -33,6 +37,11 @@ public class Booking {
     @Column(nullable = false)
     private BookingStatus status = BookingStatus.APPROVED;
 
+    @Column(nullable = false)
+    private Boolean deleted = false;
+
+    private LocalDateTime deletedAt;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -50,13 +59,15 @@ public class Booking {
     }
 
     public Booking(Long id, User user, Resource resource, LocalDate bookingDate, TimeSlot timeSlot, 
-                   BookingStatus status, LocalDateTime createdAt) {
+                   BookingStatus status, Boolean deleted, LocalDateTime deletedAt, LocalDateTime createdAt) {
         this.id = id;
         this.user = user;
         this.resource = resource;
         this.bookingDate = bookingDate;
         this.timeSlot = timeSlot;
         this.status = status;
+        this.deleted = deleted;
+        this.deletedAt = deletedAt;
         this.createdAt = createdAt;
     }
 
@@ -115,5 +126,21 @@ public class Booking {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
     }
 }

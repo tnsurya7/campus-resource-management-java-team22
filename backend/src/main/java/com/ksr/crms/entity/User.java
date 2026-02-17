@@ -8,7 +8,10 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", indexes = {
+    @Index(name = "idx_email", columnList = "email", unique = true),
+    @Index(name = "idx_role_status", columnList = "role, status")
+})
 public class User {
 
     @Id
@@ -24,6 +27,10 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @NotBlank(message = "Password is required")
+    @Column(nullable = false)
+    private String password;
+
     private String phone;
 
     @Enumerated(EnumType.STRING)
@@ -33,6 +40,16 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Status status = Status.ACTIVE;
+
+    @Column(nullable = false)
+    private Integer failedLoginAttempts = 0;
+
+    private LocalDateTime lockedUntil;
+
+    @Column(nullable = false)
+    private Boolean deleted = false;
+
+    private LocalDateTime deletedAt;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
@@ -50,13 +67,20 @@ public class User {
     public User() {
     }
 
-    public User(Long id, String name, String email, String phone, Role role, Status status, LocalDateTime createdAt) {
+    public User(Long id, String name, String email, String password, String phone, Role role, Status status, 
+                Integer failedLoginAttempts, LocalDateTime lockedUntil, Boolean deleted, LocalDateTime deletedAt, 
+                LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
         this.email = email;
+        this.password = password;
         this.phone = phone;
         this.role = role;
         this.status = status;
+        this.failedLoginAttempts = failedLoginAttempts;
+        this.lockedUntil = lockedUntil;
+        this.deleted = deleted;
+        this.deletedAt = deletedAt;
         this.createdAt = createdAt;
     }
 
@@ -83,6 +107,14 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getPhone() {
@@ -115,5 +147,37 @@ public class User {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Integer getFailedLoginAttempts() {
+        return failedLoginAttempts;
+    }
+
+    public void setFailedLoginAttempts(Integer failedLoginAttempts) {
+        this.failedLoginAttempts = failedLoginAttempts;
+    }
+
+    public LocalDateTime getLockedUntil() {
+        return lockedUntil;
+    }
+
+    public void setLockedUntil(LocalDateTime lockedUntil) {
+        this.lockedUntil = lockedUntil;
+    }
+
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
     }
 }

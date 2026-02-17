@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -74,6 +75,7 @@ public class BookingService {
         booking.setBookingDate(bookingDTO.getBookingDate());
         booking.setTimeSlot(bookingDTO.getTimeSlot());
         booking.setStatus(Booking.BookingStatus.APPROVED);
+        booking.setDeleted(false);
 
         Booking savedBooking = bookingRepository.save(booking);
         return convertToDTO(savedBooking);
@@ -81,6 +83,7 @@ public class BookingService {
 
     public List<BookingDTO> getAllBookings() {
         return bookingRepository.findAll().stream()
+                .filter(booking -> !booking.getDeleted()) // Exclude soft-deleted bookings
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -93,16 +96,25 @@ public class BookingService {
 
     public List<BookingDTO> getBookingsByUserId(Long userId) {
         return bookingRepository.findByUserId(userId).stream()
+                .filter(booking -> !booking.getDeleted()) // Exclude soft-deleted bookings
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
     @Transactional
     public void deleteBooking(Long id) {
-        if (!bookingRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Booking not found with id: " + id);
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Booking not found with id: " + id));
+
+        // Check if booking date is in the past
+        if (booking.getBookingDate().isBefore(LocalDate.now())) {
+            throw new ValidationException("Cannot cancel past bookings");
         }
-        bookingRepository.deleteById(id);
+
+        // Soft delete
+        booking.setDeleted(true);
+        booking.setDeletedAt(LocalDateTime.now());
+        bookingRepository.save(booking);
     }
 
     private BookingDTO convertToDTO(Booking booking) {

@@ -10,6 +10,7 @@ import com.ksr.crms.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,6 +32,7 @@ public class ResourceService {
         resource.setType(resourceDTO.getType());
         resource.setCapacity(resourceDTO.getCapacity());
         resource.setStatus(resourceDTO.getStatus() != null ? resourceDTO.getStatus() : Resource.Status.AVAILABLE);
+        resource.setDeleted(false);
 
         Resource savedResource = resourceRepository.save(resource);
         return convertToDTO(savedResource);
@@ -38,6 +40,7 @@ public class ResourceService {
 
     public List<ResourceDTO> getAllResources() {
         return resourceRepository.findAll().stream()
+                .filter(resource -> !resource.getDeleted()) // Exclude soft-deleted resources
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -64,10 +67,13 @@ public class ResourceService {
 
     @Transactional
     public void deleteResource(Long id) {
-        if (!resourceRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Resource not found with id: " + id);
-        }
-        resourceRepository.deleteById(id);
+        Resource resource = resourceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Resource not found with id: " + id));
+
+        // Soft delete
+        resource.setDeleted(true);
+        resource.setDeletedAt(LocalDateTime.now());
+        resourceRepository.save(resource);
     }
 
     private ResourceDTO convertToDTO(Resource resource) {

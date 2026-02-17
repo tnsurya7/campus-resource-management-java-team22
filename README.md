@@ -1,266 +1,279 @@
 # 🎓 Campus Resource Management System (CRMS)
 
-A full-stack enterprise application for managing campus resources, bookings, and users with role-based access control.
+Enterprise-grade full-stack application for managing campus resources, bookings, and users with JWT authentication and role-based access control.
 
-## 📦 Project Structure
+## � Quick Start
 
-```
-campus-resource-management/
-├── backend/                 # Spring Boot backend
-│   ├── src/
-│   ├── pom.xml
-│   └── README.md
-├── frontend/                # React frontend
-│   ├── src/
-│   ├── package.json
-│   └── README.md
-└── README.md               # This file
-```
+### Prerequisites
+- Java 17+
+- Maven 3.6+
+- Node.js 16+
+- PostgreSQL (or use environment variables for your database)
 
-## 🚀 Quick Start
+### Backend Setup
 
-### Backend (Spring Boot)
+1. **Configure Environment Variables**
+   ```bash
+   cd backend
+   cp .env.example .env
+   # Edit .env with your database credentials
+   ```
 
-```bash
-cd backend
-mvn spring-boot:run
-```
+2. **Run Backend**
+   ```bash
+   mvn spring-boot:run
+   ```
+   Backend runs on: `http://localhost:8080`
 
-Backend runs on: `http://localhost:8080`
+### Frontend Setup
 
-### Frontend (React + Vite)
+1. **Install Dependencies**
+   ```bash
+   cd frontend
+   npm install
+   ```
 
-```bash
-cd frontend
-npm install
-npm run dev
-```
+2. **Run Frontend**
+   ```bash
+   npm run dev
+   ```
+   Frontend runs on: `http://localhost:5173`
 
-Frontend runs on: `http://localhost:5173`
+## 📚 Documentation
+
+- **API Documentation**: http://localhost:8080/swagger-ui/index.html
+- **Security Setup**: See `SECURITY_SETUP.md`
+- **Backend Details**: See `backend/README.md`
+- **Frontend Details**: See `frontend/README.md`
 
 ## 🏗️ Architecture
 
-### Backend
-- **Framework**: Spring Boot 3.x
-- **Database**: H2 (in-memory) / MySQL
-- **API**: RESTful
-- **Authentication**: Header-based (X-User-Id)
-- **Documentation**: OpenAPI/Swagger
+### Backend Stack
+- **Framework**: Spring Boot 3.2.0
+- **Database**: PostgreSQL
+- **Security**: Spring Security + JWT
+- **API**: RESTful with OpenAPI/Swagger
+- **Build Tool**: Maven
 
-### Frontend
-- **Framework**: React 18
+### Frontend Stack
+- **Framework**: React 18 + TypeScript
 - **Build Tool**: Vite
 - **Routing**: React Router DOM
 - **State**: Context API
-- **Styling**: Tailwind CSS
+- **Styling**: Tailwind CSS v3
 - **HTTP Client**: Axios
 
-## 👥 User Roles
+## 🎯 Key Features
 
-### ADMIN
-- Full system access
-- User management (CRUD)
-- Resource management (CRUD)
-- Booking approval/rejection
-- Dashboard with statistics
+### Authentication & Security
+- ✅ JWT token-based authentication
+- ✅ BCrypt password hashing
+- ✅ Role-based access control (STAFF, STUDENT)
+- ✅ Rate limiting (3 failed login attempts)
+- ✅ Account lockout (15 minutes)
+- ✅ Stateless session management
+
+### User Management
+- Create, read, update, delete users
+- Role assignment (STAFF/STUDENT)
+- Status management (ACTIVE/INACTIVE)
+- Soft delete with audit trail
+- Pagination support
+
+### Resource Management
+- Manage campus resources (LAB, CLASSROOM, EVENT_HALL)
+- Capacity tracking
+- Status management (AVAILABLE, UNAVAILABLE, MAINTENANCE)
+- Soft delete with audit trail
+
+### Booking System
+- Book resources with date and time slot
+- Time slots: MORNING, AFTERNOON, FULL_DAY
+- Auto-approval system
+- Conflict detection (no double booking)
+- Cancel booking (only before booking date)
+- View own bookings (STUDENT) or all bookings (STAFF)
+
+### Dashboard
+- Real-time statistics
+- User counts
+- Resource availability
+- Booking metrics
+
+## � User Roles
 
 ### STAFF
-- View resources
-- Create bookings (max 5 hours)
-- View own bookings
+- Full access to user management
+- Create, update, delete resources
+- View all bookings
+- Access dashboard statistics
 
 ### STUDENT
 - View resources
-- Create bookings (max 1 hour)
+- Create bookings
 - View own bookings
+- Cancel own bookings
+- Access personal dashboard
 
-## 🎯 Features
+## 🔐 Security Features
 
-### User Management (Admin)
-- Create, read, update, delete users
-- Role assignment
-- Email validation
-
-### Resource Management
-- Create, read, update, delete resources
-- Resource types: Classroom, Lab, Auditorium, Sports Facility, Library
-- Capacity management
-- Availability status
-
-### Booking System
-- Book resources with date/time
-- Duration validation based on role
-- Approval workflow
-- Rejection with reason
-- Conflict detection
-
-### Dashboard (Admin)
-- Total users count
-- Total resources count
-- Total bookings count
-- Approved bookings count
-
-## 🔐 Authentication & Authorization
-
-- **Authentication**: User selection (no password for demo)
-- **Authorization**: Header-based using `X-User-Id`
-- **Frontend**: Stores user in localStorage
-- **Backend**: Validates user ID and role for each request
+- **JWT Authentication**: Stateless, scalable authentication
+- **Password Security**: BCrypt hashing with salt
+- **Rate Limiting**: Protection against brute force attacks
+- **Soft Delete**: Data preservation for audit trails
+- **Database Indexes**: Optimized query performance
+- **CORS Configuration**: Secure cross-origin requests
+- **Input Validation**: Server-side validation for all inputs
 
 ## 📡 API Endpoints
 
+### Authentication
+- `POST /auth/login` - Login and get JWT token
+
 ### Users
-- `GET /users` - Get all users
-- `POST /users` - Create user
+- `POST /users` - Register new user (public)
+- `GET /users` - Get all users (STAFF only, paginated)
+- `GET /users/{id}` - Get user by ID
 - `PUT /users/{id}` - Update user
-- `DELETE /users/{id}` - Delete user
+- `DELETE /users/{id}` - Delete user (STAFF only)
 
 ### Resources
+- `POST /resources` - Create resource (STAFF only)
 - `GET /resources` - Get all resources
-- `POST /resources` - Create resource
-- `PUT /resources/{id}` - Update resource
-- `DELETE /resources/{id}` - Delete resource
+- `GET /resources/{id}` - Get resource by ID
+- `PUT /resources/{id}` - Update resource (STAFF only)
+- `DELETE /resources/{id}` - Delete resource (STAFF only)
 
 ### Bookings
-- `GET /bookings` - Get all bookings
-- `GET /bookings/user/{userId}` - Get user bookings
 - `POST /bookings` - Create booking
-- `PUT /bookings/{id}` - Update booking
-- `DELETE /bookings/{id}` - Delete booking
-- `POST /bookings/{id}/approve` - Approve booking
-- `POST /bookings/{id}/reject` - Reject booking
+- `GET /bookings` - Get all bookings (STAFF only)
+- `GET /bookings/{id}` - Get booking by ID
+- `GET /bookings/user/{userId}` - Get user bookings
+- `DELETE /bookings/{id}` - Cancel booking
 
 ### Dashboard
 - `GET /dashboard/stats` - Get dashboard statistics
 
+## �️ Tech Stack Details
+
+### Backend Technologies
+- Java 17
+- Spring Boot 3.2.0
+- Spring Security
+- Spring Data JPA
+- PostgreSQL
+- JWT (jjwt 0.11.5)
+- Hibernate
+- Maven
+- Swagger/OpenAPI 3.0
+
+### Frontend Technologies
+- React 18
+- TypeScript
+- Vite
+- React Router DOM v6
+- Axios
+- Tailwind CSS v3
+- Lucide React (icons)
+- React Toastify
+
+## � Configuration
+
+### Environment Variables
+
+Create `backend/.env` file:
+```env
+DB_URL=jdbc:postgresql://your-host:5432/your-database
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+JWT_SECRET=your_strong_secret_key
+JWT_EXPIRATION=86400000
+```
+
+See `SECURITY_SETUP.md` for detailed configuration instructions.
+
 ## 🧪 Testing
 
-### Backend Testing
+### Backend
 ```bash
 cd backend
 mvn test
 ```
 
-### Frontend Testing
-See `frontend/TESTING_CHECKLIST.md` for comprehensive testing guide.
+### Frontend
+```bash
+cd frontend
+npm run test
+```
 
-## 🚀 Deployment
+### API Testing
+Use Swagger UI at: http://localhost:8080/swagger-ui/index.html
+
+## � Deployment
 
 ### Backend Deployment
-- Package: `mvn clean package`
-- Run JAR: `java -jar target/crms-backend.jar`
-- Deploy to: AWS, Heroku, Railway, etc.
+```bash
+cd backend
+mvn clean package
+java -jar target/crms-0.0.1-SNAPSHOT.jar
+```
 
 ### Frontend Deployment
-- Build: `npm run build`
-- Deploy to: Vercel, Netlify, AWS S3, etc.
-- See `frontend/DEPLOYMENT.md` for detailed guide
-
-## 📚 Documentation
-
-### Backend
-- `backend/README.md` - Backend documentation
-- Swagger UI: `http://localhost:8080/swagger-ui.html`
-
-### Frontend
-- `frontend/README.md` - Complete frontend documentation
-- `frontend/QUICKSTART.md` - Quick start guide
-- `frontend/TESTING_CHECKLIST.md` - Testing checklist
-- `frontend/PROJECT_SUMMARY.md` - Project overview
-- `frontend/DEPLOYMENT.md` - Deployment guide
-- `FRONTEND_HANDOFF.md` - Complete handoff document
-
-## 🛠️ Tech Stack
-
-### Backend
-- Java 17+
-- Spring Boot 3.x
-- Spring Data JPA
-- H2 Database
-- Lombok
-- OpenAPI/Swagger
-- Maven
-
-### Frontend
-- React 18
-- Vite
-- React Router DOM
-- Axios
-- Context API
-- Tailwind CSS
-- React Hook Form
-- Zod
-- React Toastify
-
-## 🔧 Configuration
-
-### Backend Configuration
-Edit `backend/src/main/resources/application.properties`:
-```properties
-server.port=8080
-spring.datasource.url=jdbc:h2:mem:crmsdb
+```bash
+cd frontend
+npm run build
+# Deploy dist/ folder to your hosting service
 ```
 
-### Frontend Configuration
-Edit `frontend/.env`:
-```env
-VITE_API_BASE_URL=http://localhost:8080
-```
-
-## 🐛 Troubleshooting
+## � Troubleshooting
 
 ### Backend Issues
-- **Port already in use**: Change port in `application.properties`
-- **Database errors**: Check H2 console at `/h2-console`
+- **Port 8080 in use**: Change port in `application.properties`
+- **Database connection failed**: Check credentials in `.env`
+- **JWT errors**: Verify JWT_SECRET is set
 
 ### Frontend Issues
-- **CORS errors**: Configure CORS in backend
-- **API not responding**: Check backend is running
-- **Blank page**: Check browser console for errors
+- **CORS errors**: Verify backend CORS configuration
+- **API not responding**: Check backend is running on port 8080
+- **Login fails**: Check credentials and backend logs
 
-## 📊 Project Statistics
+## � Project Statistics
 
-- **Total Files**: 50+
-- **Backend Endpoints**: 15+
-- **Frontend Pages**: 6
-- **Frontend Components**: 12
-- **Lines of Code**: 3000+
+- **Backend Endpoints**: 20+
+- **Frontend Pages**: 8
+- **Frontend Components**: 15+
+- **Security Features**: 6
+- **Database Tables**: 3 (Users, Resources, Bookings)
+- **Lines of Code**: 5000+
 
 ## 🎓 Learning Outcomes
 
 This project demonstrates:
-1. Full-stack development (Spring Boot + React)
-2. RESTful API design
+1. Enterprise-level Spring Boot application
+2. JWT authentication and authorization
 3. Role-based access control
-4. State management (Context API)
-5. Form handling and validation
-6. Error handling
-7. Responsive design
-8. Production-ready architecture
+4. RESTful API design
+5. React with TypeScript
+6. State management with Context API
+7. Responsive UI with Tailwind CSS
+8. Security best practices
+9. Database design and optimization
+10. Production-ready architecture
 
 ## 👨‍💻 Development Team
 
-**Team 22**
-- Backend: Spring Boot REST API
-- Frontend: React + Vite
-- Integration: Full-stack
+**Team 22 - Java Spring Boot Project**
 
 ## 📝 License
 
 This project is for educational purposes.
 
-## 🎯 Future Enhancements
+## � Security
 
-- [ ] JWT authentication
-- [ ] Email notifications
-- [ ] Calendar view for bookings
-- [ ] Resource search and filters
-- [ ] Booking history
-- [ ] User profile management
-- [ ] File uploads
-- [ ] Real-time updates (WebSocket)
-- [ ] Mobile app
-- [ ] Analytics dashboard
+- Never commit `.env` files
+- Use strong passwords and JWT secrets
+- See `SECURITY_SETUP.md` for security guidelines
+- Review code before pushing to Git
 
 ## 🤝 Contributing
 
@@ -273,17 +286,13 @@ This project is for educational purposes.
 ## 📞 Support
 
 For questions or issues:
-1. Check documentation files
-2. Review code comments
-3. Test with different scenarios
-4. Check browser/server console logs
-
-## 🎉 Acknowledgments
-
-Built with modern technologies and best practices for enterprise-level applications.
+1. Check `SECURITY_SETUP.md` for setup help
+2. Review Swagger API documentation
+3. Check browser/server console logs
+4. Review backend logs for errors
 
 ---
 
-**Ready for Production! 🚀**
+**Production-Ready Enterprise Application** 🚀
 
 Built with ❤️ by Team 22
