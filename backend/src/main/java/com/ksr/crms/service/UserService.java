@@ -44,6 +44,12 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
+    public List<UserDTO> getUsersByStatus(User.Status status) {
+        return userRepository.findByStatus(status).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
     public UserDTO getUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
@@ -70,18 +76,10 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteUser(Long id, Long requestingUserId) {
-        User requestingUser = userRepository.findById(requestingUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("Requesting user not found"));
-
-        if (requestingUser.getRole() != User.Role.ADMIN) {
-            throw new UnauthorizedException("Only ADMIN can delete users");
-        }
-
+    public void deleteUser(Long id) {
         if (!userRepository.existsById(id)) {
             throw new ResourceNotFoundException("User not found with id: " + id);
         }
-
         userRepository.deleteById(id);
     }
 

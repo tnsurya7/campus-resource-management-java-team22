@@ -5,7 +5,6 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 @Entity
 @Table(name = "bookings")
@@ -26,51 +25,38 @@ public class Booking {
     @Column(nullable = false)
     private LocalDate bookingDate;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private LocalTime startTime;
-
-    @Column(nullable = false)
-    private LocalTime endTime;
-
-    @Column(nullable = false)
-    private Integer durationHours;
+    private TimeSlot timeSlot;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private BookingStatus status = BookingStatus.PENDING;
-
-    private String rejectionReason;
-
-    private Long approvedBy;
-
-    private LocalDateTime approvedAt;
+    private BookingStatus status = BookingStatus.APPROVED;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    public enum TimeSlot {
+        MORNING, AFTERNOON, FULL_DAY
+    }
+
     public enum BookingStatus {
-        PENDING, APPROVED, REJECTED
+        APPROVED
     }
 
     // Constructors
     public Booking() {
     }
 
-    public Booking(Long id, User user, Resource resource, LocalDate bookingDate, LocalTime startTime, 
-                   LocalTime endTime, Integer durationHours, BookingStatus status, String rejectionReason, 
-                   Long approvedBy, LocalDateTime approvedAt, LocalDateTime createdAt) {
+    public Booking(Long id, User user, Resource resource, LocalDate bookingDate, TimeSlot timeSlot, 
+                   BookingStatus status, LocalDateTime createdAt) {
         this.id = id;
         this.user = user;
         this.resource = resource;
         this.bookingDate = bookingDate;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.durationHours = durationHours;
+        this.timeSlot = timeSlot;
         this.status = status;
-        this.rejectionReason = rejectionReason;
-        this.approvedBy = approvedBy;
-        this.approvedAt = approvedAt;
         this.createdAt = createdAt;
     }
 
@@ -107,28 +93,12 @@ public class Booking {
         this.bookingDate = bookingDate;
     }
 
-    public LocalTime getStartTime() {
-        return startTime;
+    public TimeSlot getTimeSlot() {
+        return timeSlot;
     }
 
-    public void setStartTime(LocalTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public LocalTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalTime endTime) {
-        this.endTime = endTime;
-    }
-
-    public Integer getDurationHours() {
-        return durationHours;
-    }
-
-    public void setDurationHours(Integer durationHours) {
-        this.durationHours = durationHours;
+    public void setTimeSlot(TimeSlot timeSlot) {
+        this.timeSlot = timeSlot;
     }
 
     public BookingStatus getStatus() {
@@ -137,30 +107,6 @@ public class Booking {
 
     public void setStatus(BookingStatus status) {
         this.status = status;
-    }
-
-    public String getRejectionReason() {
-        return rejectionReason;
-    }
-
-    public void setRejectionReason(String rejectionReason) {
-        this.rejectionReason = rejectionReason;
-    }
-
-    public Long getApprovedBy() {
-        return approvedBy;
-    }
-
-    public void setApprovedBy(Long approvedBy) {
-        this.approvedBy = approvedBy;
-    }
-
-    public LocalDateTime getApprovedAt() {
-        return approvedAt;
-    }
-
-    public void setApprovedAt(LocalDateTime approvedAt) {
-        this.approvedAt = approvedAt;
     }
 
     public LocalDateTime getCreatedAt() {

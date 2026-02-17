@@ -63,18 +63,10 @@ public class ResourceService {
     }
 
     @Transactional
-    public void deleteResource(Long id, Long requestingUserId) {
-        User requestingUser = userRepository.findById(requestingUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("Requesting user not found"));
-
-        if (requestingUser.getRole() != User.Role.ADMIN) {
-            throw new UnauthorizedException("Only ADMIN can delete resources");
-        }
-
+    public void deleteResource(Long id) {
         if (!resourceRepository.existsById(id)) {
             throw new ResourceNotFoundException("Resource not found with id: " + id);
         }
-
         resourceRepository.deleteById(id);
     }
 

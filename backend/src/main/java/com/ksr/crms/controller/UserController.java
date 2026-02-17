@@ -30,9 +30,14 @@ public class UserController {
     }
 
     @GetMapping
-    @Operation(summary = "Get all users")
-    public ResponseEntity<List<UserDTO>> getAllUsers() {
-        List<UserDTO> users = userService.getAllUsers();
+    @Operation(summary = "Get all users or filter by status")
+    public ResponseEntity<List<UserDTO>> getAllUsers(@RequestParam(required = false) String status) {
+        List<UserDTO> users;
+        if (status != null) {
+            users = userService.getUsersByStatus(com.ksr.crms.entity.User.Status.valueOf(status.toUpperCase()));
+        } else {
+            users = userService.getAllUsers();
+        }
         return ResponseEntity.ok(users);
     }
 
@@ -51,11 +56,9 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete user (ADMIN only)")
-    public ResponseEntity<Void> deleteUser(
-            @PathVariable Long id,
-            @RequestHeader("X-User-Id") Long requestingUserId) {
-        userService.deleteUser(id, requestingUserId);
+    @Operation(summary = "Delete user")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
 }

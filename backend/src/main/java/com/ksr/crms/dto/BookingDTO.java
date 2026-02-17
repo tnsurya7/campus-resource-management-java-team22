@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 public class BookingDTO {
 
@@ -24,23 +23,10 @@ public class BookingDTO {
     @NotNull(message = "Booking date is required")
     private LocalDate bookingDate;
 
-    @NotNull(message = "Start time is required")
-    private LocalTime startTime;
-
-    @NotNull(message = "End time is required")
-    private LocalTime endTime;
-
-    private Integer durationHours;
+    @NotNull(message = "Time slot is required")
+    private Booking.TimeSlot timeSlot;
 
     private Booking.BookingStatus status;
-
-    private String rejectionReason;
-
-    private Long approvedBy;
-
-    private String approvedByName;
-
-    private LocalDateTime approvedAt;
 
     private LocalDateTime createdAt;
 
@@ -49,23 +35,16 @@ public class BookingDTO {
     }
 
     public BookingDTO(Long id, Long userId, String userName, Long resourceId, String resourceName, 
-                      LocalDate bookingDate, LocalTime startTime, LocalTime endTime, Integer durationHours, 
-                      Booking.BookingStatus status, String rejectionReason, Long approvedBy, 
-                      String approvedByName, LocalDateTime approvedAt, LocalDateTime createdAt) {
+                      LocalDate bookingDate, Booking.TimeSlot timeSlot, Booking.BookingStatus status, 
+                      LocalDateTime createdAt) {
         this.id = id;
         this.userId = userId;
         this.userName = userName;
         this.resourceId = resourceId;
         this.resourceName = resourceName;
         this.bookingDate = bookingDate;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.durationHours = durationHours;
+        this.timeSlot = timeSlot;
         this.status = status;
-        this.rejectionReason = rejectionReason;
-        this.approvedBy = approvedBy;
-        this.approvedByName = approvedByName;
-        this.approvedAt = approvedAt;
         this.createdAt = createdAt;
     }
 
@@ -118,28 +97,12 @@ public class BookingDTO {
         this.bookingDate = bookingDate;
     }
 
-    public LocalTime getStartTime() {
-        return startTime;
+    public Booking.TimeSlot getTimeSlot() {
+        return timeSlot;
     }
 
-    public void setStartTime(LocalTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public LocalTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalTime endTime) {
-        this.endTime = endTime;
-    }
-
-    public Integer getDurationHours() {
-        return durationHours;
-    }
-
-    public void setDurationHours(Integer durationHours) {
-        this.durationHours = durationHours;
+    public void setTimeSlot(Booking.TimeSlot timeSlot) {
+        this.timeSlot = timeSlot;
     }
 
     public Booking.BookingStatus getStatus() {
@@ -148,38 +111,6 @@ public class BookingDTO {
 
     public void setStatus(Booking.BookingStatus status) {
         this.status = status;
-    }
-
-    public String getRejectionReason() {
-        return rejectionReason;
-    }
-
-    public void setRejectionReason(String rejectionReason) {
-        this.rejectionReason = rejectionReason;
-    }
-
-    public Long getApprovedBy() {
-        return approvedBy;
-    }
-
-    public void setApprovedBy(Long approvedBy) {
-        this.approvedBy = approvedBy;
-    }
-
-    public String getApprovedByName() {
-        return approvedByName;
-    }
-
-    public void setApprovedByName(String approvedByName) {
-        this.approvedByName = approvedByName;
-    }
-
-    public LocalDateTime getApprovedAt() {
-        return approvedAt;
-    }
-
-    public void setApprovedAt(LocalDateTime approvedAt) {
-        this.approvedAt = approvedAt;
     }
 
     public LocalDateTime getCreatedAt() {

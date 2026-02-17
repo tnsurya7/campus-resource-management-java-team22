@@ -13,7 +13,7 @@ public class ResourceDTO {
     @NotBlank(message = "Resource name is required")
     private String name;
 
-    private String type;
+    private Resource.Type type;
 
     @Min(value = 1, message = "Capacity must be greater than 0")
     private Integer capacity;
@@ -26,7 +26,7 @@ public class ResourceDTO {
     public ResourceDTO() {
     }
 
-    public ResourceDTO(Long id, String name, String type, Integer capacity, Resource.Status status, LocalDateTime createdAt) {
+    public ResourceDTO(Long id, String name, Resource.Type type, Integer capacity, Resource.Status status, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
         this.type = type;
@@ -52,11 +52,11 @@ public class ResourceDTO {
         this.name = name;
     }
 
-    public String getType() {
+    public Resource.Type getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(Resource.Type type) {
         this.type = type;
     }
 

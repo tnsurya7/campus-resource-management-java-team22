@@ -39,7 +39,7 @@ public class User {
     private LocalDateTime createdAt;
 
     public enum Role {
-        STUDENT, STAFF, ADMIN
+        STUDENT, STAFF
     }
 
     public enum Status {
