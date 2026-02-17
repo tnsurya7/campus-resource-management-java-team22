@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/bookings")
@@ -51,42 +50,10 @@ public class BookingController {
         return ResponseEntity.ok(bookings);
     }
 
-    @PutMapping("/{id}")
-    @Operation(summary = "Update booking (ADMIN only)")
-    public ResponseEntity<BookingDTO> updateBooking(
-            @PathVariable Long id,
-            @Valid @RequestBody BookingDTO bookingDTO,
-            @RequestHeader("X-User-Id") Long requestingUserId) {
-        BookingDTO updatedBooking = bookingService.updateBooking(id, bookingDTO, requestingUserId);
-        return ResponseEntity.ok(updatedBooking);
-    }
-
-    @PostMapping("/{id}/approve")
-    @Operation(summary = "Approve booking (ADMIN only)")
-    public ResponseEntity<BookingDTO> approveBooking(
-            @PathVariable Long id,
-            @RequestHeader("X-User-Id") Long approverId) {
-        BookingDTO approvedBooking = bookingService.approveBooking(id, approverId);
-        return ResponseEntity.ok(approvedBooking);
-    }
-
-    @PostMapping("/{id}/reject")
-    @Operation(summary = "Reject booking (ADMIN only)")
-    public ResponseEntity<BookingDTO> rejectBooking(
-            @PathVariable Long id,
-            @RequestHeader("X-User-Id") Long rejecterId,
-            @RequestBody Map<String, String> payload) {
-        String rejectionReason = payload.get("rejectionReason");
-        BookingDTO rejectedBooking = bookingService.rejectBooking(id, rejecterId, rejectionReason);
-        return ResponseEntity.ok(rejectedBooking);
-    }
-
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete booking (ADMIN only)")
-    public ResponseEntity<Void> deleteBooking(
-            @PathVariable Long id,
-            @RequestHeader("X-User-Id") Long requestingUserId) {
-        bookingService.deleteBooking(id, requestingUserId);
+    @Operation(summary = "Delete booking")
+    public ResponseEntity<Void> deleteBooking(@PathVariable Long id) {
+        bookingService.deleteBooking(id);
         return ResponseEntity.noContent().build();
     }
 }

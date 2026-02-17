@@ -19,7 +19,8 @@ public class Resource {
     @Column(nullable = false)
     private String name;
 
-    private String type;
+    @Enumerated(EnumType.STRING)
+    private Type type;
 
     @Min(value = 1, message = "Capacity must be greater than 0")
     @Column(nullable = false)
@@ -33,6 +34,10 @@ public class Resource {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    public enum Type {
+        LAB, CLASSROOM, EVENT_HALL
+    }
+
     public enum Status {
         AVAILABLE, UNAVAILABLE, MAINTENANCE
     }
@@ -41,7 +46,7 @@ public class Resource {
     public Resource() {
     }
 
-    public Resource(Long id, String name, String type, Integer capacity, Status status, LocalDateTime createdAt) {
+    public Resource(Long id, String name, Type type, Integer capacity, Status status, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
         this.type = type;
@@ -67,11 +72,11 @@ public class Resource {
         this.name = name;
     }
 
-    public String getType() {
+    public Type getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(Type type) {
         this.type = type;
     }
 

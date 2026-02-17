@@ -7,3 +7,9 @@ target/
 .idea/
 .vscode/
 .DS_Store
+
+# Environment variables (NEVER commit these)
+.env
+.env.local
+*.env
+application-secret.properties

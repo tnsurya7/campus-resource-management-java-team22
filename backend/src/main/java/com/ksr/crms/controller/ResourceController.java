@@ -51,11 +51,9 @@ public class ResourceController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete resource (ADMIN only)")
-    public ResponseEntity<Void> deleteResource(
-            @PathVariable Long id,
-            @RequestHeader("X-User-Id") Long requestingUserId) {
-        resourceService.deleteResource(id, requestingUserId);
+    @Operation(summary = "Delete resource")
+    public ResponseEntity<Void> deleteResource(@PathVariable Long id) {
+        resourceService.deleteResource(id);
         return ResponseEntity.noContent().build();
     }
 }
