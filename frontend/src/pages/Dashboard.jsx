@@ -1,11 +1,18 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
-import { toast } from 'react-toastify';
+import Card from '../components/ui/Card';
+import { Building2, Calendar, CheckCircle, Users, TrendingUp } from 'lucide-react';
 
 const Dashboard = () => {
-  const [stats, setStats] = useState(null);
+  const { user } = useAuth();
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalResources: 0,
+    totalBookings: 0,
+    totalApprovedBookings: 0
+  });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchStats();
@@ -13,187 +20,148 @@ const Dashboard = () => {
 
   const fetchStats = async () => {
     try {
-      setLoading(true);
-      setError(null);
       const response = await api.get('/dashboard/stats');
       setStats(response.data);
     } catch (error) {
-      setError('Failed to load dashboard statistics');
-      toast.error('Unable to fetch dashboard data');
+      console.error('Failed to fetch stats:', error);
     } finally {
       setLoading(false);
     }
   };
 
+  const statCards = [
+    {
+      title: 'Total Resources',
+      value: stats.totalResources,
+      icon: Building2,
+      color: 'from-blue-500 to-cyan-500',
+      bgColor: 'bg-blue-50',
+      textColor: 'text-blue-600'
+    },
+    {
+      title: 'Total Bookings',
+      value: stats.totalBookings,
+      icon: Calendar,
+      color: 'from-purple-500 to-pink-500',
+      bgColor: 'bg-purple-50',
+      textColor: 'text-purple-600'
+    },
+    {
+      title: 'Approved Bookings',
+      value: stats.totalApprovedBookings,
+      icon: CheckCircle,
+      color: 'from-green-500 to-emerald-500',
+      bgColor: 'bg-green-50',
+      textColor: 'text-green-600'
+    },
+    {
+      title: 'Total Users',
+      value: stats.totalUsers,
+      icon: Users,
+      color: 'from-orange-500 to-red-500',
+      bgColor: 'bg-orange-50',
+      textColor: 'text-orange-600'
+    }
+  ];
+
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="skeleton h-10 w-48 rounded-lg"></div>
+        <div>
+          <h1 className="text-2xl font-semibold text-slate-900">Dashboard</h1>
+          <p className="text-slate-500 mt-1">Loading statistics...</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="skeleton h-40 rounded-2xl"></div>
+            <Card key={i} className="p-6 animate-pulse">
+              <div className="h-20 bg-slate-200 rounded"></div>
+            </Card>
           ))}
         </div>
       </div>
     );
   }
 
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-96">
-        <div className="text-center">
-          <svg className="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <h3 className="text-xl font-semibold text-gray-800 mb-2">{error}</h3>
-          <button
-            onClick={fetchStats}
-            className="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const statCards = [
-    { 
-      label: 'Total Users', 
-      value: stats?.totalUsers || 0, 
-      icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-        </svg>
-      ),
-      gradient: 'from-blue-500 to-cyan-500',
-      bgGradient: 'from-blue-50 to-cyan-50',
-      textColor: 'text-blue-600'
-    },
-    { 
-      label: 'Total Resources', 
-      value: stats?.totalResources || 0, 
-      icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-        </svg>
-      ),
-      gradient: 'from-green-500 to-emerald-500',
-      bgGradient: 'from-green-50 to-emerald-50',
-      textColor: 'text-green-600'
-    },
-    { 
-      label: 'Total Bookings', 
-      value: stats?.totalBookings || 0, 
-      icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-      ),
-      gradient: 'from-purple-500 to-pink-500',
-      bgGradient: 'from-purple-50 to-pink-50',
-      textColor: 'text-purple-600'
-    },
-    { 
-      label: 'Approved Bookings', 
-      value: stats?.totalApprovedBookings || 0, 
-      icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
-      gradient: 'from-teal-500 to-green-500',
-      bgGradient: 'from-teal-50 to-green-50',
-      textColor: 'text-teal-600'
-    },
-  ];
-
   return (
-    <div className="space-y-8 animate-fadeIn">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">Dashboard</h1>
-          <p className="text-gray-600">Welcome back! Here's your system overview.</p>
-        </div>
-        <button
-          onClick={fetchStats}
-          className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md"
-        >
-          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-          <span className="font-medium text-gray-700">Refresh</span>
-        </button>
+      <div>
+        <h1 className="text-3xl font-semibold text-slate-900">
+          Welcome back, {user?.name}! 👋
+        </h1>
+        <p className="text-slate-500 mt-2">Here's what's happening with your campus resources today.</p>
       </div>
-      
+
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statCards.map((stat, index) => (
-          <div 
-            key={index} 
-            className="group relative bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-1"
-          >
-            {/* Background Gradient */}
-            <div className={`absolute inset-0 bg-gradient-to-br ${stat.bgGradient} opacity-50`}></div>
-            
-            {/* Content */}
-            <div className="relative p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className={`p-3 rounded-xl bg-gradient-to-br ${stat.gradient} text-white shadow-lg transform group-hover:scale-110 transition-transform duration-300`}>
-                  {stat.icon}
+        {statCards.map((stat, index) => {
+          const Icon = stat.icon;
+          return (
+            <Card key={index} hover className="p-6">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-slate-600 mb-1">{stat.title}</p>
+                  <p className="text-3xl font-bold text-slate-900">{stat.value}</p>
+                  <div className="flex items-center gap-1 mt-2">
+                    <TrendingUp className="w-4 h-4 text-green-600" />
+                    <span className="text-xs text-green-600 font-medium">Live</span>
+                  </div>
+                </div>
+                <div className={`w-12 h-12 ${stat.bgColor} rounded-xl flex items-center justify-center`}>
+                  <Icon className={`w-6 h-6 ${stat.textColor}`} />
                 </div>
               </div>
-              
-              <div>
-                <p className="text-gray-600 text-sm font-medium mb-1">{stat.label}</p>
-                <p className={`text-4xl font-bold ${stat.textColor}`}>{stat.value}</p>
-              </div>
-
-              {/* Decorative Element */}
-              <div className={`absolute -bottom-2 -right-2 w-24 h-24 bg-gradient-to-br ${stat.gradient} opacity-10 rounded-full blur-2xl`}></div>
-            </div>
-          </div>
-        ))}
+            </Card>
+          );
+        })}
       </div>
 
-      {/* Additional Info */}
-      <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 bg-indigo-100 rounded-lg">
-            <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <h2 className="text-xl font-bold text-gray-800">System Information</h2>
-        </div>
+      {/* Quick Actions */}
+      <Card className="p-6">
+        <h2 className="text-lg font-semibold text-slate-900 mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 bg-gray-50 rounded-xl">
-            <p className="text-sm text-gray-600 mb-1">Approval Rate</p>
-            <p className="text-2xl font-bold text-gray-800">
-              {stats?.totalBookings > 0 
-                ? Math.round((stats.totalApprovedBookings / stats.totalBookings) * 100) 
-                : 0}%
-            </p>
-          </div>
-          <div className="p-4 bg-gray-50 rounded-xl">
-            <p className="text-sm text-gray-600 mb-1">Pending Bookings</p>
-            <p className="text-2xl font-bold text-gray-800">
-              {(stats?.totalBookings || 0) - (stats?.totalApprovedBookings || 0)}
-            </p>
-          </div>
-          <div className="p-4 bg-gray-50 rounded-xl">
-            <p className="text-sm text-gray-600 mb-1">Resource Utilization</p>
-            <p className="text-2xl font-bold text-gray-800">
-              {stats?.totalResources > 0 
-                ? Math.round((stats.totalBookings / stats.totalResources) * 10) / 10
-                : 0}
-            </p>
-          </div>
+          <a
+            href="/resources"
+            className="flex items-center gap-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl hover:shadow-md transition-all duration-200"
+          >
+            <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center">
+              <Building2 className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <p className="font-medium text-slate-900">Browse Resources</p>
+              <p className="text-sm text-slate-500">Find and book resources</p>
+            </div>
+          </a>
+          
+          <a
+            href="/my-bookings"
+            className="flex items-center gap-4 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl hover:shadow-md transition-all duration-200"
+          >
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-lg flex items-center justify-center">
+              <Calendar className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <p className="font-medium text-slate-900">My Bookings</p>
+              <p className="text-sm text-slate-500">View your bookings</p>
+            </div>
+          </a>
+
+          {user?.role === 'STAFF' && (
+            <a
+              href="/users"
+              className="flex items-center gap-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl hover:shadow-md transition-all duration-200"
+            >
+              <div className="w-10 h-10 bg-gradient-to-br from-green-600 to-emerald-600 rounded-lg flex items-center justify-center">
+                <Users className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p className="font-medium text-slate-900">Manage Users</p>
+                <p className="text-sm text-slate-500">Add or edit users</p>
+              </div>
+            </a>
+          )}
         </div>
-      </div>
+      </Card>
     </div>
   );
 };

@@ -1,18 +1,26 @@
 import { useState, useEffect } from 'react';
-import api from '../api/axios';
-import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
-import ResourceForm from '../components/ResourceForm';
-import BookingForm from '../components/BookingForm';
+import api from '../api/axios';
+import Card from '../components/ui/Card';
+import Badge from '../components/ui/Badge';
+import Button from '../components/ui/Button';
+import Modal from '../components/ui/Modal';
+import Input from '../components/ui/Input';
+import Select from '../components/ui/Select';
+import { Building2, Users, Calendar, Plus } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 const Resources = () => {
+  const { user } = useAuth();
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showResourceModal, setShowResourceModal] = useState(false);
-  const [showBookingModal, setShowBookingModal] = useState(false);
-  const [editingResource, setEditingResource] = useState(null);
   const [selectedResource, setSelectedResource] = useState(null);
-  const { isAdmin } = useAuth();
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [bookingData, setBookingData] = useState({
+    bookingDate: '',
+    timeSlot: 'MORNING'
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchResources();
@@ -23,142 +31,205 @@ const Resources = () => {
       const response = await api.get('/resources');
       setResources(response.data);
     } catch (error) {
-      console.error('Failed to fetch resources');
+      toast.error('Failed to load resources');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCreateResource = () => {
-    setEditingResource(null);
-    setShowResourceModal(true);
+  const handleBookClick = (resource) => {
+    setSelectedResource(resource);
+    setShowBookingModal(true);
+    setBookingData({
+      bookingDate: '',
+      timeSlot: 'MORNING'
+    });
   };
 
-  const handleEditResource = (resource) => {
-    setEditingResource(resource);
-    setShowResourceModal(true);
-  };
-
-  const handleDeleteResource = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this resource?')) return;
+  const handleBookingSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
 
     try {
-      await api.delete(`/resources/${id}`);
-      toast.success('Resource deleted successfully');
-      fetchResources();
+      await api.post('/bookings', {
+        userId: user.id,
+        resourceId: selectedResource.id,
+        bookingDate: bookingData.bookingDate,
+        timeSlot: bookingData.timeSlot
+      });
+      toast.success('Booking created successfully!');
+      setShowBookingModal(false);
+      setSelectedResource(null);
     } catch (error) {
       // Error handled by interceptor
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleBookResource = (resource) => {
-    setSelectedResource(resource);
-    setShowBookingModal(true);
+  const getStatusBadge = (status) => {
+    const variants = {
+      AVAILABLE: 'success',
+      UNAVAILABLE: 'danger',
+      MAINTENANCE: 'warning'
+    };
+    return variants[status] || 'default';
+  };
+
+  const getTypeBadge = (type) => {
+    const variants = {
+      LAB: 'info',
+      CLASSROOM: 'purple',
+      EVENT_HALL: 'warning'
+    };
+    return variants[type] || 'default';
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="space-y-6">
+        <h1 className="text-2xl font-semibold text-slate-900">Resources</h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Card key={i} className="p-6 animate-pulse">
+              <div className="h-40 bg-slate-200 rounded"></div>
+            </Card>
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Resources</h1>
-        {isAdmin() && (
-          <button
-            onClick={handleCreateResource}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition"
-          >
-            + Add Resource
-          </button>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-slate-900">Resources</h1>
+          <p className="text-slate-500 mt-1">Browse and book available campus resources</p>
+        </div>
+        {user?.role === 'STAFF' && (
+          <Button icon={Plus}>Add Resource</Button>
         )}
       </div>
 
-      {resources.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-md p-12 text-center">
-          <p className="text-gray-500 text-lg">No resources found</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {resources.map((resource) => (
-            <div key={resource.id} className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition">
-              <h3 className="text-xl font-bold text-gray-800 mb-2">{resource.name}</h3>
-              <p className="text-gray-600 mb-4">{resource.description}</p>
-              
-              <div className="space-y-2 mb-4">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Type:</span>
-                  <span className="font-semibold">{resource.type}</span>
+      {/* Resources Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {resources.map((resource) => (
+          <Card key={resource.id} hover className="p-6">
+            <div className="space-y-4">
+              {/* Header */}
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h3 className="font-semibold text-lg text-slate-900">{resource.name}</h3>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Badge variant={getTypeBadge(resource.type)}>
+                      {resource.type}
+                    </Badge>
+                    <Badge variant={getStatusBadge(resource.status)}>
+                      {resource.status}
+                    </Badge>
+                  </div>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Capacity:</span>
-                  <span className="font-semibold">{resource.capacity}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Status:</span>
-                  <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                    resource.available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                  }`}>
-                    {resource.available ? 'Available' : 'Unavailable'}
-                  </span>
+                <div className="w-12 h-12 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl flex items-center justify-center">
+                  <Building2 className="w-6 h-6 text-indigo-600" />
                 </div>
               </div>
 
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleBookResource(resource)}
-                  disabled={!resource.available}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Book
-                </button>
-                {isAdmin() && (
-                  <>
-                    <button
-                      onClick={() => handleEditResource(resource)}
-                      className="px-4 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteResource(resource.id)}
-                      className="px-4 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg transition"
-                    >
-                      Delete
-                    </button>
-                  </>
-                )}
+              {/* Details */}
+              <div className="flex items-center gap-2 text-sm text-slate-600">
+                <Users className="w-4 h-4" />
+                <span>Capacity: {resource.capacity}</span>
+              </div>
+
+              {/* Action */}
+              <Button
+                variant="primary"
+                className="w-full"
+                disabled={resource.status !== 'AVAILABLE'}
+                onClick={() => handleBookClick(resource)}
+              >
+                <Calendar className="w-4 h-4" />
+                Book Resource
+              </Button>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      {/* Booking Modal */}
+      <Modal
+        isOpen={showBookingModal}
+        onClose={() => setShowBookingModal(false)}
+        title="Book Resource"
+      >
+        {selectedResource && (
+          <form onSubmit={handleBookingSubmit} className="space-y-4">
+            {/* Resource Info */}
+            <div className="p-4 bg-indigo-50 rounded-xl border border-indigo-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
+                  <Building2 className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-900">{selectedResource.name}</p>
+                  <p className="text-sm text-slate-600">{selectedResource.type} • Capacity: {selectedResource.capacity}</p>
+                </div>
               </div>
             </div>
-          ))}
-        </div>
-      )}
 
-      {showResourceModal && (
-        <ResourceForm
-          resource={editingResource}
-          onClose={() => setShowResourceModal(false)}
-          onSuccess={() => {
-            setShowResourceModal(false);
-            fetchResources();
-          }}
-        />
-      )}
+            {/* Date */}
+            <Input
+              type="date"
+              label="Booking Date"
+              value={bookingData.bookingDate}
+              onChange={(e) => setBookingData({ ...bookingData, bookingDate: e.target.value })}
+              min={new Date().toISOString().split('T')[0]}
+              required
+            />
 
-      {showBookingModal && (
-        <BookingForm
-          resource={selectedResource}
-          onClose={() => setShowBookingModal(false)}
-          onSuccess={() => {
-            setShowBookingModal(false);
-            toast.success('Booking created successfully');
-          }}
-        />
-      )}
+            {/* Time Slot */}
+            <Select
+              label="Time Slot"
+              value={bookingData.timeSlot}
+              onChange={(e) => setBookingData({ ...bookingData, timeSlot: e.target.value })}
+              options={[
+                { value: 'MORNING', label: 'Morning (9 AM - 12 PM)' },
+                { value: 'AFTERNOON', label: 'Afternoon (1 PM - 5 PM)' },
+                { value: 'FULL_DAY', label: 'Full Day (9 AM - 5 PM)' }
+              ]}
+              required
+            />
+
+            {/* Info */}
+            <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <p className="text-sm text-blue-800">
+                <strong>Note:</strong> Bookings are automatically approved by the system.
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3 pt-2">
+              <Button
+                type="submit"
+                variant="primary"
+                className="flex-1"
+                loading={isSubmitting}
+              >
+                Confirm Booking
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setShowBookingModal(false)}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
+        )}
+      </Modal>
     </div>
   );
 };
