@@ -1,75 +1,70 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { LayoutDashboard, BookOpen, Users, Building2, Calendar } from 'lucide-react';
 
 const Sidebar = () => {
-  const { isAdmin, isStaff, isStudent } = useAuth();
+  const { user } = useAuth();
 
-  const navLinkClass = ({ isActive }) =>
-    `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium ${
-      isActive
-        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg transform scale-105'
-        : 'text-gray-700 hover:bg-gray-100 hover:translate-x-1'
-    }`;
-
-  const iconClass = "w-5 h-5";
+  const navItems = [
+    { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { path: '/resources', label: 'Resources', icon: Building2 },
+    { path: '/bookings', label: 'Bookings', icon: Calendar },
+    { path: '/my-bookings', label: 'My Bookings', icon: BookOpen },
+    { path: '/users', label: 'Users', icon: Users },
+  ];
 
   return (
-    <aside className="w-72 bg-white border-r border-gray-200 min-h-screen p-4 sticky top-16">
-      <nav className="space-y-2">
-        {isAdmin() && (
-          <NavLink to="/dashboard" className={navLinkClass}>
-            <svg className={iconClass} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-            Dashboard
-          </NavLink>
-        )}
-        
-        {isAdmin() && (
-          <NavLink to="/users" className={navLinkClass}>
-            <svg className={iconClass} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
-            Users
-          </NavLink>
-        )}
-        
-        <NavLink to="/resources" className={navLinkClass}>
-          <svg className={iconClass} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-          </svg>
-          Resources
-        </NavLink>
-        
-        {isAdmin() && (
-          <NavLink to="/bookings" className={navLinkClass}>
-            <svg className={iconClass} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            All Bookings
-          </NavLink>
-        )}
-        
-        {(isStudent() || isStaff()) && (
-          <NavLink to="/my-bookings" className={navLinkClass}>
-            <svg className={iconClass} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
-            My Bookings
-          </NavLink>
-        )}
+    <div className="w-64 bg-white border-r border-slate-200 min-h-screen p-6">
+      <div className="mb-8">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
+            <Building2 className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h2 className="font-semibold text-slate-900">CRMS</h2>
+            <p className="text-xs text-slate-500">Resource Manager</p>
+          </div>
+        </div>
+      </div>
+
+      <nav className="space-y-1">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
+                  isActive
+                    ? 'bg-indigo-50 text-indigo-600 font-medium'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <Icon className={`w-5 h-5 ${isActive ? 'text-indigo-600' : 'text-slate-400'}`} />
+                  <span className="text-sm">{item.label}</span>
+                </>
+              )}
+            </NavLink>
+          );
+        })}
       </nav>
 
-      {/* Quick Stats */}
-      <div className="mt-8 p-4 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border border-indigo-100">
-        <p className="text-sm font-semibold text-gray-700 mb-2">Quick Tip</p>
-        <p className="text-xs text-gray-600">
-          {isAdmin() && "You have full access to manage all resources and bookings."}
-          {isStaff() && "You can book resources for up to 5 hours."}
-          {isStudent() && "You can book resources for up to 1 hour."}
-        </p>
-      </div>
-    </aside>
+      {user && (
+        <div className="mt-auto pt-6 border-t border-slate-200">
+          <div className="px-3 py-2">
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">
+              Logged in as
+            </p>
+            <p className="text-sm font-medium text-slate-900">{user.name}</p>
+            <p className="text-xs text-slate-500">{user.role}</p>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
