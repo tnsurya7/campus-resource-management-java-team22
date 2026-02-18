@@ -1,5 +1,5 @@
 // User Types
-export type UserRole = 'student' | 'staff';
+export type UserRole = 'student' | 'staff' | 'admin';
 export type UserStatus = 'active' | 'inactive';
 
 export interface User {
@@ -54,15 +54,22 @@ export interface Booking {
 // Time Slot Definitions
 export const TIME_SLOT_INFO = {
     // Legacy time slots (for backward compatibility)
-    MORNING: { label: 'Morning', time: 'Morning slot', hours: 3, forStudents: true, forStaff: true },
-    AFTERNOON: { label: 'Afternoon', time: 'Afternoon slot', hours: 4, forStudents: true, forStaff: true },
+    MORNING: { label: 'Morning', time: 'Morning slot', hours: 3, forStudents: true, forStaff: true, forAdmin: true },
+    AFTERNOON: { label: 'Afternoon', time: 'Afternoon slot', hours: 4, forStudents: true, forStaff: true, forAdmin: true },
     // New time slots
-    ONE_HOUR: { label: '1 Hour', time: '1 hour slot', hours: 1, forStudents: true, forStaff: true },
-    TWO_HOURS: { label: '2 Hours', time: '2 hour slot', hours: 2, forStudents: true, forStaff: true },
-    THREE_HOURS: { label: '3 Hours', time: '3 hour slot', hours: 3, forStudents: true, forStaff: true },
-    FOUR_HOURS: { label: '4 Hours', time: '4 hour slot', hours: 4, forStudents: false, forStaff: true },
-    FIVE_HOURS: { label: '5 Hours', time: '5 hour slot', hours: 5, forStudents: false, forStaff: true },
-    FULL_DAY: { label: 'Full Day', time: 'Full day (8+ hours)', hours: 8, forStudents: false, forStaff: true },
+    ONE_HOUR: { label: '1 Hour', time: '1 hour slot', hours: 1, forStudents: true, forStaff: true, forAdmin: true },
+    TWO_HOURS: { label: '2 Hours', time: '2 hour slot', hours: 2, forStudents: true, forStaff: true, forAdmin: true },
+    THREE_HOURS: { label: '3 Hours', time: '3 hour slot', hours: 3, forStudents: true, forStaff: true, forAdmin: true },
+    FOUR_HOURS: { label: '4 Hours', time: '4 hour slot', hours: 4, forStudents: false, forStaff: true, forAdmin: true },
+    FIVE_HOURS: { label: '5 Hours', time: '5 hour slot', hours: 5, forStudents: false, forStaff: true, forAdmin: true },
+    FULL_DAY: { label: 'Full Day', time: 'Full day (8+ hours)', hours: 8, forStudents: false, forStaff: true, forAdmin: true },
+} as const;
+
+// Session Timeout (in milliseconds)
+export const SESSION_TIMEOUT = {
+    student: 5 * 60 * 1000,  // 5 minutes
+    staff: 10 * 60 * 1000,   // 10 minutes
+    admin: 30 * 60 * 1000,   // 30 minutes
 } as const;
 
 // Validation Rules

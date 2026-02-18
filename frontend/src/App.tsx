@@ -5,6 +5,7 @@ import { Login } from '../ui/pages/Login';
 import { Register, RegisterFormData } from '../ui/pages/Register';
 import { StudentDashboard } from '../ui/pages/StudentDashboard';
 import { StaffDashboard } from '../ui/pages/StaffDashboard';
+import { AdminDashboard } from '../ui/pages/AdminDashboard';
 import { ResourcesPage } from '../ui/pages/ResourcesPage';
 import { MyBookingsPage } from '../ui/pages/MyBookingsPage';
 import { AllBookingsPage } from '../ui/pages/AllBookingsPage';
@@ -12,6 +13,7 @@ import { UserManagementPage } from '../ui/pages/UserManagementPage';
 import { MainLayout } from '../ui/layout/MainLayout';
 import { authAPI } from '../ui/services/api';
 import { submissionGuard } from '../ui/utils/security';
+import { SESSION_TIMEOUT } from '../ui/types';
 
 // Main App Component
 function App() {
@@ -33,16 +35,19 @@ function AppContent() {
 
     // Listen for session expiry
     useEffect(() => {
-        const handleSessionExpiry = () => {
-            showToast('Your session has expired due to inactivity. Please log in again.', 'warning');
+        const handleSessionExpiry = (event: Event) => {
+            const customEvent = event as CustomEvent;
+            const role = (customEvent.detail?.role || user?.role) as 'student' | 'staff' | 'admin';
+            const timeoutMinutes = role && SESSION_TIMEOUT[role] ? SESSION_TIMEOUT[role] / 60000 : 5;
+            showToast(`Your session has expired after ${timeoutMinutes} minutes of inactivity. Please log in again.`, 'warning');
             logout();
         };
 
         window.addEventListener('session-expired', handleSessionExpiry);
         return () => window.removeEventListener('session-expired', handleSessionExpiry);
-    }, [logout, showToast]);
+    }, [logout, showToast, user]);
 
-    const handleLogin = async (email: string, password: string, role: 'student' | 'staff') => {
+    const handleLogin = async (email: string, password: string, role: 'student' | 'staff' | 'admin') => {
         const submissionKey = `login-${email}`;
 
         // Prevent duplicate submissions
@@ -131,11 +136,13 @@ function AppContent() {
     // Render page content based on active page and role
     const renderPageContent = () => {
         if (activePage === 'dashboard') {
-            return user?.role === 'student' ? (
-                <StudentDashboard onNavigate={handleNavigate} />
-            ) : (
-                <StaffDashboard onNavigate={handleNavigate} />
-            );
+            if (user?.role === 'student') {
+                return <StudentDashboard onNavigate={handleNavigate} />;
+            } else if (user?.role === 'admin') {
+                return <AdminDashboard onNavigate={handleNavigate} />;
+            } else {
+                return <StaffDashboard onNavigate={handleNavigate} />;
+            }
         }
 
         if (activePage === 'resources') {
@@ -146,11 +153,11 @@ function AppContent() {
             return <MyBookingsPage />;
         }
 
-        if (activePage === 'bookings' && user?.role === 'staff') {
+        if (activePage === 'all-bookings' && (user?.role === 'staff' || user?.role === 'admin')) {
             return <AllBookingsPage />;
         }
 
-        if (activePage === 'users' && user?.role === 'staff') {
+        if (activePage === 'users' && (user?.role === 'staff' || user?.role === 'admin')) {
             return <UserManagementPage />;
         }
 

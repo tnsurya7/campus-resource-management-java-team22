@@ -200,10 +200,14 @@ export const ResourcesPage: React.FC = () => {
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">Resources</h1>
                     <p className="text-gray-600 mt-1">
-                        {user?.role === 'student' ? 'Browse and book available resources' : 'Manage and book campus resources'}
+                        {user?.role === 'student' 
+                            ? 'Browse and book available resources' 
+                            : user?.role === 'admin' 
+                            ? 'Full control over all campus resources' 
+                            : 'View and book campus resources'}
                     </p>
                 </div>
-                {user?.role === 'staff' && (
+                {user?.role === 'admin' && (
                     <Button
                         onClick={() => {
                             resetForm();
@@ -308,7 +312,7 @@ export const ResourcesPage: React.FC = () => {
                                             Book Now
                                         </Button>
                                     )}
-                                    {user?.role === 'staff' && (
+                                    {user?.role === 'admin' && (
                                         <>
                                             <Button
                                                 onClick={() => openEditModal(resource)}
@@ -365,7 +369,7 @@ export const ResourcesPage: React.FC = () => {
                         >
                             {Object.entries(TIME_SLOT_INFO).map(([key, info]) => {
                                 // Filter time slots based on user role
-                                const isAllowed = user?.role === 'staff' ? info.forStaff : info.forStudents;
+                                const isAllowed = user?.role === 'admin' ? info.forAdmin : user?.role === 'staff' ? info.forStaff : info.forStudents;
                                 if (!isAllowed) return null;
                                 
                                 return (
@@ -380,6 +384,9 @@ export const ResourcesPage: React.FC = () => {
                         )}
                         {user?.role === 'staff' && (
                             <p className="text-xs text-indigo-600 mt-1">Staff have priority and can book any duration</p>
+                        )}
+                        {user?.role === 'admin' && (
+                            <p className="text-xs text-purple-600 mt-1">Admin can book resources anytime with full access</p>
                         )}
                     </div>
 

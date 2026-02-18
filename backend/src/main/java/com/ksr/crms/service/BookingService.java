@@ -57,6 +57,17 @@ public class BookingService {
             throw new ValidationException("Cannot book past date");
         }
 
+        // Students can only book 1 booking per day
+        if (user.getRole() == User.Role.STUDENT) {
+            List<Booking> existingBookings = bookingRepository.findByUserIdAndBookingDate(
+                    user.getId(),
+                    bookingDTO.getBookingDate()
+            );
+            if (!existingBookings.isEmpty()) {
+                throw new ValidationException("Students can only book one resource per day");
+            }
+        }
+
         // Check for conflicting bookings
         List<Booking> conflicts = bookingRepository.findConflictingBookings(
                 bookingDTO.getResourceId(),
@@ -68,21 +79,22 @@ public class BookingService {
             throw new ConflictException("Resource is already booked for the selected time slot");
         }
 
-        // Create booking - PENDING for students, APPROVED for staff
+        // Create booking - PENDING for students, APPROVED for staff and admin
         Booking booking = new Booking();
         booking.setUser(user);
         booking.setResource(resource);
         booking.setBookingDate(bookingDTO.getBookingDate());
         booking.setTimeSlot(bookingDTO.getTimeSlot());
         
-        // Staff bookings are auto-approved, student bookings need approval
-        if (user.getRole() == User.Role.STAFF) {
+        // Staff and Admin bookings are auto-approved, student bookings need approval
+        if (user.getRole() == User.Role.STAFF || user.getRole() == User.Role.ADMIN) {
             booking.setStatus(Booking.BookingStatus.APPROVED);
         } else {
             booking.setStatus(Booking.BookingStatus.PENDING);
         }
         
         // Validate time slot for students (1-3 hours only)
+        // Staff and Admin can book any duration
         if (user.getRole() == User.Role.STUDENT) {
             if (bookingDTO.getTimeSlot() == Booking.TimeSlot.FOUR_HOURS ||
                 bookingDTO.getTimeSlot() == Booking.TimeSlot.FIVE_HOURS) {

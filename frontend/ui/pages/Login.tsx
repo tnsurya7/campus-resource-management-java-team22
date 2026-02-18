@@ -107,7 +107,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, onNavigateToRegister }) =
                             <label className="block text-sm font-medium text-gray-700 mb-3">
                                 I am a
                             </label>
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-3 gap-3">
                                 <button
                                     type="button"
                                     onClick={() => setRole('student')}
@@ -120,9 +120,8 @@ export const Login: React.FC<LoginProps> = ({ onLogin, onNavigateToRegister }) =
                                     <svg className="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
                                     </svg>
-                                    <div className="font-medium">Student</div>
+                                    <div className="font-medium text-sm">Student</div>
                                 </button>
                                 <button
                                     type="button"
@@ -136,7 +135,21 @@ export const Login: React.FC<LoginProps> = ({ onLogin, onNavigateToRegister }) =
                                     <svg className="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                     </svg>
-                                    <div className="font-medium">Staff</div>
+                                    <div className="font-medium text-sm">Staff</div>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setRole('admin')}
+                                    disabled={isLoading || isLocked}
+                                    className={`p-4 rounded-lg border-2 transition-all duration-200 ${role === 'admin'
+                                            ? 'border-purple-600 bg-purple-50 text-purple-700'
+                                            : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                                        } ${(isLoading || isLocked) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                >
+                                    <svg className="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                    </svg>
+                                    <div className="font-medium text-sm">Admin</div>
                                 </button>
                             </div>
                         </div>
@@ -151,7 +164,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, onNavigateToRegister }) =
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                placeholder={role === 'student' ? 'student@campus.edu' : 'staff@campus.edu'}
+                                placeholder={role === 'admin' ? 'admin@crms.com' : role === 'student' ? 'student@campus.edu' : 'staff@campus.edu'}
                                 className={`w-full h-11 px-4 bg-white border rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all shadow-sm ${emailError ? 'border-red-300' : 'border-gray-300'
                                     }`}
                                 disabled={isLoading || isLocked}

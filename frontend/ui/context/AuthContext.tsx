@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { sessionManager } from '../utils/security';
+import { SESSION_TIMEOUT } from '../types';
 
-export type UserRole = 'student' | 'staff';
+export type UserRole = 'student' | 'staff' | 'admin';
 
 export interface User {
     id: string;
@@ -27,6 +27,41 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Session manager with role-based timeouts
+class SessionManager {
+    private lastActivity: number = Date.now();
+    private userRole: UserRole | null = null;
+
+    setRole(role: UserRole) {
+        this.userRole = role;
+        this.updateActivity();
+    }
+
+    updateActivity() {
+        this.lastActivity = Date.now();
+    }
+
+    isSessionExpired(): boolean {
+        if (!this.userRole) return false;
+        
+        const timeout = SESSION_TIMEOUT[this.userRole];
+        const elapsed = Date.now() - this.lastActivity;
+        return elapsed > timeout;
+    }
+
+    clearSession() {
+        this.lastActivity = Date.now();
+        this.userRole = null;
+    }
+
+    getTimeoutDuration(): number {
+        if (!this.userRole) return SESSION_TIMEOUT.student;
+        return SESSION_TIMEOUT[this.userRole];
+    }
+}
+
+const sessionManager = new SessionManager();
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
 
@@ -34,27 +69,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     useEffect(() => {
         const storedUser = localStorage.getItem('crms_user');
         if (storedUser) {
+            const userData = JSON.parse(storedUser);
+            sessionManager.setRole(userData.role);
+            
             // Check if session expired
             if (sessionManager.isSessionExpired()) {
                 logout();
             } else {
-                setUser(JSON.parse(storedUser));
+                setUser(userData);
                 sessionManager.updateActivity();
             }
         }
     }, []);
 
-    // Auto-logout on inactivity (15 minutes)
+    // Auto-logout on inactivity (role-based timeout)
     useEffect(() => {
         if (!user) return;
 
         const checkInactivity = setInterval(() => {
             if (sessionManager.isSessionExpired()) {
                 logout();
-                // Show toast notification (will be handled by App.tsx)
-                window.dispatchEvent(new CustomEvent('session-expired'));
+                // Show toast notification
+                window.dispatchEvent(new CustomEvent('session-expired', {
+                    detail: { role: user.role }
+                }));
             }
-        }, 60000); // Check every minute
+        }, 30000); // Check every 30 seconds
 
         return () => clearInterval(checkInactivity);
     }, [user]);
@@ -84,6 +124,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const login = useCallback((userData: User) => {
         setUser(userData);
         localStorage.setItem('crms_user', JSON.stringify(userData));
+        sessionManager.setRole(userData.role);
         sessionManager.updateActivity();
     }, []);
 

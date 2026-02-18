@@ -159,7 +159,7 @@ export const StaffDashboard: React.FC<{ onNavigate: (page: string) => void }> = 
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <button 
                     onClick={() => onNavigate('resources')}
                     className="p-4 bg-white border-2 border-indigo-200 rounded-xl hover:border-indigo-400 hover:shadow-md transition-all duration-200 text-left group">
@@ -177,22 +177,6 @@ export const StaffDashboard: React.FC<{ onNavigate: (page: string) => void }> = 
                 </button>
 
                 <button 
-                    onClick={() => onNavigate('resources')}
-                    className="p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-purple-300 hover:shadow-md transition-all duration-200 text-left group">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-purple-100 rounded-lg text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-colors">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                            </svg>
-                        </div>
-                        <div>
-                            <p className="font-medium text-gray-900 text-sm">Add Resource</p>
-                            <p className="text-xs text-gray-500">Create new resource</p>
-                        </div>
-                    </div>
-                </button>
-
-                <button 
                     onClick={() => onNavigate('all-bookings')}
                     className="p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all duration-200 text-left group">
                     <div className="flex items-center gap-3">
@@ -203,23 +187,7 @@ export const StaffDashboard: React.FC<{ onNavigate: (page: string) => void }> = 
                         </div>
                         <div>
                             <p className="font-medium text-gray-900 text-sm">View Bookings</p>
-                            <p className="text-xs text-gray-500">Manage all bookings</p>
-                        </div>
-                    </div>
-                </button>
-
-                <button 
-                    onClick={() => onNavigate('users')}
-                    className="p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-green-300 hover:shadow-md transition-all duration-200 text-left group">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-green-100 rounded-lg text-green-600 group-hover:bg-green-600 group-hover:text-white transition-colors">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <p className="font-medium text-gray-900 text-sm">Manage Users</p>
-                            <p className="text-xs text-gray-500">User administration</p>
+                            <p className="text-xs text-gray-500">View all bookings</p>
                         </div>
                     </div>
                 </button>

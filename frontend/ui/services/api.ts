@@ -47,7 +47,7 @@ const mapBackendUser = (backendUser: any): User => {
         name: backendUser.name,
         email: backendUser.email,
         phone: backendUser.phone || '',
-        role: backendUser.role.toLowerCase() as 'student' | 'staff',
+        role: backendUser.role.toLowerCase() as 'student' | 'staff' | 'admin',
         status: backendUser.status.toLowerCase() as 'active' | 'inactive',
         createdAt: backendUser.createdAt,
     };
@@ -86,7 +86,7 @@ const mapBackendBooking = (backendBooking: any): Booking => {
 
 // Auth API
 export const authAPI = {
-    login: async (email: string, password: string, role: 'student' | 'staff'): Promise<User> => {
+    login: async (email: string, password: string, role: 'student' | 'staff' | 'admin'): Promise<User> => {
         try {
             const response = await apiClient.post('/auth/login', {
                 email,

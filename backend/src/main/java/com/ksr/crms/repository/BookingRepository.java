@@ -25,4 +25,13 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("bookingDate") LocalDate bookingDate,
             @Param("timeSlot") Booking.TimeSlot timeSlot
     );
+
+    @Query("SELECT b FROM Booking b WHERE b.user.id = :userId " +
+           "AND b.bookingDate = :bookingDate " +
+           "AND (b.deleted IS NULL OR b.deleted = false) " +
+           "AND b.status != 'REJECTED'")
+    List<Booking> findByUserIdAndBookingDate(
+            @Param("userId") Long userId,
+            @Param("bookingDate") LocalDate bookingDate
+    );
 }
