@@ -13,32 +13,13 @@ const apiClient = axios.create({
     withCredentials: true,
 });
 
-// Request interceptor to add JWT token
-apiClient.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem('jwt_token');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => {
-        return Promise.reject(error);
-    }
-);
+// No JWT token needed anymore - removed authentication interceptor
 
 // Response interceptor for error handling
 apiClient.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response) {
-            // Handle 401 Unauthorized - token expired or invalid
-            if (error.response.status === 401) {
-                localStorage.removeItem('jwt_token');
-                localStorage.removeItem('crms_user');
-                window.dispatchEvent(new CustomEvent('session-expired'));
-            }
-            
             // Server responded with error status
             const message = error.response.data?.message || error.response.data?.error || 'An error occurred';
             throw new Error(message);
@@ -112,13 +93,8 @@ export const authAPI = {
                 password
             });
             
-            // Extract token and user from response
-            const { token, user: userData } = response.data;
-            
-            // Store JWT token
-            localStorage.setItem('jwt_token', token);
-            
-            const user = mapBackendUser(userData);
+            // Backend now returns just the user object (no JWT token)
+            const user = mapBackendUser(response.data);
             
             // Verify role matches
             if (user.role !== role) {
@@ -252,9 +228,20 @@ export const bookingsAPI = {
 
     updateStatus: async (id: string, status: BookingStatus, rejectionReason?: string): Promise<Booking> => {
         try {
-            // Note: Backend doesn't have updateStatus endpoint, so we'll use update
-            // This is a limitation - you may need to add this endpoint to backend
-            throw new Error('Update status not implemented in backend');
+            let response;
+            if (status === 'APPROVED') {
+                response = await apiClient.put(`/bookings/${id}/approve`);
+            } else if (status === 'REJECTED') {
+                if (!rejectionReason) {
+                    throw new Error('Rejection reason is required');
+                }
+                response = await apiClient.put(`/bookings/${id}/reject`, {
+                    reason: rejectionReason
+                });
+            } else {
+                throw new Error('Invalid status');
+            }
+            return mapBackendBooking(response.data);
         } catch (error) {
             throw error;
         }
@@ -273,8 +260,10 @@ export const bookingsAPI = {
 export const usersAPI = {
     getAll: async (): Promise<User[]> => {
         try {
-            const response = await apiClient.get('/users');
-            return response.data.map(mapBackendUser);
+            const response = await apiClient.get('/users?page=0&size=1000');
+            // Backend returns paginated response
+            const data = response.data.content || response.data;
+            return Array.isArray(data) ? data.map(mapBackendUser) : [];
         } catch (error) {
             throw error;
         }

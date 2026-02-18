@@ -35,9 +35,12 @@ public class Booking {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private BookingStatus status = BookingStatus.APPROVED;
+    private BookingStatus status = BookingStatus.PENDING;
 
-    @Column(nullable = false)
+    @Column(length = 500)
+    private String rejectionReason;
+
+    @Column(nullable = true) // Nullable for existing records
     private Boolean deleted = false;
 
     private LocalDateTime deletedAt;
@@ -47,11 +50,22 @@ public class Booking {
     private LocalDateTime createdAt;
 
     public enum TimeSlot {
-        MORNING, AFTERNOON, FULL_DAY
+        // Legacy values (for backward compatibility with existing data)
+        MORNING,
+        AFTERNOON,
+        // New values
+        ONE_HOUR,      // 1 hour (Students & Staff)
+        TWO_HOURS,     // 2 hours (Students & Staff)
+        THREE_HOURS,   // 3 hours (Students & Staff)
+        FOUR_HOURS,    // 4 hours (Staff only)
+        FIVE_HOURS,    // 5 hours (Staff only)
+        FULL_DAY       // Full day (Staff only)
     }
 
     public enum BookingStatus {
-        APPROVED
+        PENDING,
+        APPROVED,
+        REJECTED
     }
 
     // Constructors
@@ -59,13 +73,14 @@ public class Booking {
     }
 
     public Booking(Long id, User user, Resource resource, LocalDate bookingDate, TimeSlot timeSlot, 
-                   BookingStatus status, Boolean deleted, LocalDateTime deletedAt, LocalDateTime createdAt) {
+                   BookingStatus status, String rejectionReason, Boolean deleted, LocalDateTime deletedAt, LocalDateTime createdAt) {
         this.id = id;
         this.user = user;
         this.resource = resource;
         this.bookingDate = bookingDate;
         this.timeSlot = timeSlot;
         this.status = status;
+        this.rejectionReason = rejectionReason;
         this.deleted = deleted;
         this.deletedAt = deletedAt;
         this.createdAt = createdAt;
@@ -142,5 +157,13 @@ public class Booking {
 
     public void setDeletedAt(LocalDateTime deletedAt) {
         this.deletedAt = deletedAt;
+    }
+
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
     }
 }

@@ -68,13 +68,29 @@ public class BookingService {
             throw new ConflictException("Resource is already booked for the selected time slot");
         }
 
-        // Create booking - auto-approved
+        // Create booking - PENDING for students, APPROVED for staff
         Booking booking = new Booking();
         booking.setUser(user);
         booking.setResource(resource);
         booking.setBookingDate(bookingDTO.getBookingDate());
         booking.setTimeSlot(bookingDTO.getTimeSlot());
-        booking.setStatus(Booking.BookingStatus.APPROVED);
+        
+        // Staff bookings are auto-approved, student bookings need approval
+        if (user.getRole() == User.Role.STAFF) {
+            booking.setStatus(Booking.BookingStatus.APPROVED);
+        } else {
+            booking.setStatus(Booking.BookingStatus.PENDING);
+        }
+        
+        // Validate time slot for students (1-3 hours only)
+        if (user.getRole() == User.Role.STUDENT) {
+            if (bookingDTO.getTimeSlot() == Booking.TimeSlot.FOUR_HOURS ||
+                bookingDTO.getTimeSlot() == Booking.TimeSlot.FIVE_HOURS) {
+                throw new ValidationException("Students can only book 1-3 hour slots");
+            }
+            // Allow FULL_DAY, MORNING, AFTERNOON for backward compatibility
+        }
+        
         booking.setDeleted(false);
 
         Booking savedBooking = bookingRepository.save(booking);
@@ -83,7 +99,7 @@ public class BookingService {
 
     public List<BookingDTO> getAllBookings() {
         return bookingRepository.findAll().stream()
-                .filter(booking -> !booking.getDeleted()) // Exclude soft-deleted bookings
+                .filter(booking -> booking.getDeleted() == null || !booking.getDeleted()) // Handle null deleted field
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -96,7 +112,7 @@ public class BookingService {
 
     public List<BookingDTO> getBookingsByUserId(Long userId) {
         return bookingRepository.findByUserId(userId).stream()
-                .filter(booking -> !booking.getDeleted()) // Exclude soft-deleted bookings
+                .filter(booking -> booking.getDeleted() == null || !booking.getDeleted()) // Handle null deleted field
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -117,6 +133,39 @@ public class BookingService {
         bookingRepository.save(booking);
     }
 
+    @Transactional
+    public BookingDTO approveBooking(Long id) {
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Booking not found with id: " + id));
+
+        if (booking.getStatus() != Booking.BookingStatus.PENDING) {
+            throw new ValidationException("Only pending bookings can be approved");
+        }
+
+        booking.setStatus(Booking.BookingStatus.APPROVED);
+        Booking updatedBooking = bookingRepository.save(booking);
+        return convertToDTO(updatedBooking);
+    }
+
+    @Transactional
+    public BookingDTO rejectBooking(Long id, String rejectionReason) {
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Booking not found with id: " + id));
+
+        if (booking.getStatus() != Booking.BookingStatus.PENDING) {
+            throw new ValidationException("Only pending bookings can be rejected");
+        }
+
+        if (rejectionReason == null || rejectionReason.trim().isEmpty()) {
+            throw new ValidationException("Rejection reason is required");
+        }
+
+        booking.setStatus(Booking.BookingStatus.REJECTED);
+        booking.setRejectionReason(rejectionReason);
+        Booking updatedBooking = bookingRepository.save(booking);
+        return convertToDTO(updatedBooking);
+    }
+
     private BookingDTO convertToDTO(Booking booking) {
         BookingDTO dto = new BookingDTO();
         dto.setId(booking.getId());
@@ -127,6 +176,7 @@ public class BookingService {
         dto.setBookingDate(booking.getBookingDate());
         dto.setTimeSlot(booking.getTimeSlot());
         dto.setStatus(booking.getStatus());
+        dto.setRejectionReason(booking.getRejectionReason());
         dto.setCreatedAt(booking.getCreatedAt());
         return dto;
     }

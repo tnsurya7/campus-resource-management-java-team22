@@ -27,8 +27,7 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @NotBlank(message = "Password is required")
-    @Column(nullable = false)
+    @Column(nullable = true) // Nullable for existing records without passwords
     private String password;
 
     private String phone;
@@ -41,12 +40,13 @@ public class User {
     @Column(nullable = false)
     private Status status = Status.ACTIVE;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Integer failedLoginAttempts = 0;
 
+    @Column(nullable = true)
     private LocalDateTime lockedUntil;
 
-    @Column(nullable = false)
+    @Column(nullable = true) // Nullable for existing records
     private Boolean deleted = false;
 
     private LocalDateTime deletedAt;

@@ -28,6 +28,8 @@ public class BookingDTO {
 
     private Booking.BookingStatus status;
 
+    private String rejectionReason;
+
     private LocalDateTime createdAt;
 
     // Constructors
@@ -35,8 +37,8 @@ public class BookingDTO {
     }
 
     public BookingDTO(Long id, Long userId, String userName, Long resourceId, String resourceName, 
-                      LocalDate bookingDate, Booking.TimeSlot timeSlot, Booking.BookingStatus status, 
-                      LocalDateTime createdAt) {
+                      LocalDate bookingDate, Booking.TimeSlot timeSlot, Booking.BookingStatus status,
+                      String rejectionReason, LocalDateTime createdAt) {
         this.id = id;
         this.userId = userId;
         this.userName = userName;
@@ -45,6 +47,7 @@ public class BookingDTO {
         this.bookingDate = bookingDate;
         this.timeSlot = timeSlot;
         this.status = status;
+        this.rejectionReason = rejectionReason;
         this.createdAt = createdAt;
     }
 
@@ -119,5 +122,13 @@ public class BookingDTO {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
     }
 }

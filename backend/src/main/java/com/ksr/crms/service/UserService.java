@@ -11,7 +11,6 @@ import com.ksr.crms.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,11 +22,9 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
@@ -36,18 +33,13 @@ public class UserService {
             throw new ConflictException("Email already exists: " + userDTO.getEmail());
         }
 
-        if (userDTO.getPassword() == null || userDTO.getPassword().trim().isEmpty()) {
-            throw new ValidationException("Password is required");
-        }
-
         User user = new User();
         user.setName(userDTO.getName());
         user.setEmail(userDTO.getEmail());
-        user.setPassword(passwordEncoder.encode(userDTO.getPassword())); // Hash password
+        user.setPassword(userDTO.getPassword()); // Store password as-is (no hashing)
         user.setPhone(userDTO.getPhone());
         user.setRole(userDTO.getRole());
         user.setStatus(userDTO.getStatus() != null ? userDTO.getStatus() : User.Status.ACTIVE);
-        user.setFailedLoginAttempts(0);
         user.setDeleted(false);
 
         User savedUser = userRepository.save(user);
@@ -80,7 +72,7 @@ public class UserService {
 
     public List<UserDTO> getUsersByStatus(User.Status status) {
         return userRepository.findByStatus(status).stream()
-                .filter(user -> !user.getDeleted())
+                .filter(user -> user.getDeleted() == null || !user.getDeleted()) // Handle null deleted field
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -108,7 +100,7 @@ public class UserService {
 
         // Only update password if provided
         if (userDTO.getPassword() != null && !userDTO.getPassword().trim().isEmpty()) {
-            user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+            user.setPassword(userDTO.getPassword());
         }
 
         User updatedUser = userRepository.save(user);
@@ -126,25 +118,19 @@ public class UserService {
         userRepository.save(user);
     }
 
-    // Authentication method with rate limiting
+    // Simple authentication without password hashing
     @Transactional
     public UserDTO authenticate(String email, String password) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UnauthorizedException("Invalid credentials"));
 
-        // Check if account is locked
-        if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(LocalDateTime.now())) {
-            throw new UnauthorizedException("Account is locked. Please try again later.");
-        }
-
         // Check if account is deleted
-        if (user.getDeleted()) {
+        if (user.getDeleted() != null && user.getDeleted()) {
             throw new UnauthorizedException("Account not found");
         }
 
-        // Verify password
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            handleFailedLogin(user);
+        // Simple password check (no hashing)
+        if (user.getPassword() == null || !user.getPassword().equals(password)) {
             throw new UnauthorizedException("Invalid credentials");
         }
 
@@ -153,25 +139,7 @@ public class UserService {
             throw new UnauthorizedException("Account is inactive");
         }
 
-        // Reset failed login attempts on successful login
-        if (user.getFailedLoginAttempts() > 0) {
-            user.setFailedLoginAttempts(0);
-            user.setLockedUntil(null);
-            userRepository.save(user);
-        }
-
         return convertToDTO(user);
-    }
-
-    private void handleFailedLogin(User user) {
-        user.setFailedLoginAttempts(user.getFailedLoginAttempts() + 1);
-        
-        if (user.getFailedLoginAttempts() >= 3) {
-            user.setLockedUntil(LocalDateTime.now().plusMinutes(15));
-            user.setStatus(User.Status.INACTIVE);
-        }
-        
-        userRepository.save(user);
     }
 
     private UserDTO convertToDTO(User user) {

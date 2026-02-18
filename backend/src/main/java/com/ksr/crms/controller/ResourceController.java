@@ -3,12 +3,10 @@ package com.ksr.crms.controller;
 import com.ksr.crms.dto.ResourceDTO;
 import com.ksr.crms.service.ResourceService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,7 +14,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/resources")
 @Tag(name = "Resource API", description = "Resource management endpoints")
-@SecurityRequirement(name = "bearerAuth")
 public class ResourceController {
 
     private final ResourceService resourceService;
@@ -26,15 +23,13 @@ public class ResourceController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('STAFF')")
-    @Operation(summary = "Create a new resource (STAFF only)")
+    @Operation(summary = "Create a new resource")
     public ResponseEntity<ResourceDTO> createResource(@Valid @RequestBody ResourceDTO resourceDTO) {
         ResourceDTO createdResource = resourceService.createResource(resourceDTO);
         return new ResponseEntity<>(createdResource, HttpStatus.CREATED);
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('STAFF', 'STUDENT')")
     @Operation(summary = "Get all resources")
     public ResponseEntity<List<ResourceDTO>> getAllResources() {
         List<ResourceDTO> resources = resourceService.getAllResources();
@@ -42,7 +37,6 @@ public class ResourceController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('STAFF', 'STUDENT')")
     @Operation(summary = "Get resource by ID")
     public ResponseEntity<ResourceDTO> getResourceById(@PathVariable Long id) {
         ResourceDTO resource = resourceService.getResourceById(id);
@@ -50,16 +44,14 @@ public class ResourceController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('STAFF')")
-    @Operation(summary = "Update resource (STAFF only)")
+    @Operation(summary = "Update resource")
     public ResponseEntity<ResourceDTO> updateResource(@PathVariable Long id, @Valid @RequestBody ResourceDTO resourceDTO) {
         ResourceDTO updatedResource = resourceService.updateResource(id, resourceDTO);
         return ResponseEntity.ok(updatedResource);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('STAFF')")
-    @Operation(summary = "Delete resource (STAFF only)")
+    @Operation(summary = "Delete resource")
     public ResponseEntity<Void> deleteResource(@PathVariable Long id) {
         resourceService.deleteResource(id);
         return ResponseEntity.noContent().build();

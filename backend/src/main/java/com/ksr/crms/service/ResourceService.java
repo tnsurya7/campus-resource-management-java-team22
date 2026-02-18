@@ -40,7 +40,7 @@ public class ResourceService {
 
     public List<ResourceDTO> getAllResources() {
         return resourceRepository.findAll().stream()
-                .filter(resource -> !resource.getDeleted()) // Exclude soft-deleted resources
+                .filter(resource -> resource.getDeleted() == null || !resource.getDeleted()) // Handle null deleted field
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }

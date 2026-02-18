@@ -32,7 +32,7 @@ public class Resource {
     @Column(nullable = false)
     private Status status = Status.AVAILABLE;
 
-    @Column(nullable = false)
+    @Column(nullable = true) // Nullable for existing records
     private Boolean deleted = false;
 
     private LocalDateTime deletedAt;
@@ -42,7 +42,7 @@ public class Resource {
     private LocalDateTime createdAt;
 
     public enum Type {
-        LAB, CLASSROOM, EVENT_HALL
+        LAB, CLASSROOM, EVENT_HALL, COMPUTER
     }
 
     public enum Status {

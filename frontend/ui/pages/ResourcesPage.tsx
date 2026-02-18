@@ -21,7 +21,7 @@ export const ResourcesPage: React.FC = () => {
 
     // Booking form state
     const [bookingDate, setBookingDate] = useState('');
-    const [bookingTimeSlot, setBookingTimeSlot] = useState<TimeSlot>('MORNING');
+    const [bookingTimeSlot, setBookingTimeSlot] = useState<TimeSlot>('ONE_HOUR');
     const [isBooking, setIsBooking] = useState(false);
 
     // Resource form state
@@ -68,10 +68,10 @@ export const ResourcesPage: React.FC = () => {
                 timeSlot: bookingTimeSlot,
                 location: selectedResource.location,
             });
-            showToast('Booking created and auto-approved successfully!', 'success');
+            showToast('Booking request submitted successfully!', 'success');
             setShowBookModal(false);
             setBookingDate('');
-            setBookingTimeSlot('MORNING');
+            setBookingTimeSlot('ONE_HOUR');
         } catch (error) {
             showToast(error instanceof Error ? error.message : 'Failed to create booking', 'error');
         } finally {
@@ -200,7 +200,7 @@ export const ResourcesPage: React.FC = () => {
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">Resources</h1>
                     <p className="text-gray-600 mt-1">
-                        {user?.role === 'student' ? 'Browse and book available resources' : 'Manage campus resources'}
+                        {user?.role === 'student' ? 'Browse and book available resources' : 'Manage and book campus resources'}
                     </p>
                 </div>
                 {user?.role === 'staff' && (
@@ -297,7 +297,7 @@ export const ResourcesPage: React.FC = () => {
                                 </p>
 
                                 <div className="flex gap-2">
-                                    {user?.role === 'student' && resource.status === 'AVAILABLE' && (
+                                    {resource.status === 'AVAILABLE' && (
                                         <Button
                                             onClick={() => {
                                                 setSelectedResource(resource);
@@ -363,12 +363,24 @@ export const ResourcesPage: React.FC = () => {
                             onChange={(e) => setBookingTimeSlot(e.target.value as TimeSlot)}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                         >
-                            {Object.entries(TIME_SLOT_INFO).map(([key, info]) => (
-                                <option key={key} value={key}>
-                                    {info.label} ({info.time})
-                                </option>
-                            ))}
+                            {Object.entries(TIME_SLOT_INFO).map(([key, info]) => {
+                                // Filter time slots based on user role
+                                const isAllowed = user?.role === 'staff' ? info.forStaff : info.forStudents;
+                                if (!isAllowed) return null;
+                                
+                                return (
+                                    <option key={key} value={key}>
+                                        {info.label} ({info.time})
+                                    </option>
+                                );
+                            })}
                         </select>
+                        {user?.role === 'student' && (
+                            <p className="text-xs text-gray-500 mt-1">Students can book 1-3 hour slots only</p>
+                        )}
+                        {user?.role === 'staff' && (
+                            <p className="text-xs text-indigo-600 mt-1">Staff have priority and can book any duration</p>
+                        )}
                     </div>
 
                     <div className="flex gap-3 pt-4">

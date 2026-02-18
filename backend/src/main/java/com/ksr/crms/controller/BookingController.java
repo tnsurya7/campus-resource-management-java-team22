@@ -3,12 +3,10 @@ package com.ksr.crms.controller;
 import com.ksr.crms.dto.BookingDTO;
 import com.ksr.crms.service.BookingService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,7 +14,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/bookings")
 @Tag(name = "Booking API", description = "Booking management endpoints")
-@SecurityRequirement(name = "bearerAuth")
 public class BookingController {
 
     private final BookingService bookingService;
@@ -26,7 +23,6 @@ public class BookingController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('STAFF', 'STUDENT')")
     @Operation(summary = "Create a new booking")
     public ResponseEntity<BookingDTO> createBooking(@Valid @RequestBody BookingDTO bookingDTO) {
         BookingDTO createdBooking = bookingService.createBooking(bookingDTO);
@@ -34,15 +30,13 @@ public class BookingController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('STAFF')")
-    @Operation(summary = "Get all bookings (STAFF only)")
+    @Operation(summary = "Get all bookings")
     public ResponseEntity<List<BookingDTO>> getAllBookings() {
         List<BookingDTO> bookings = bookingService.getAllBookings();
         return ResponseEntity.ok(bookings);
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('STAFF', 'STUDENT')")
     @Operation(summary = "Get booking by ID")
     public ResponseEntity<BookingDTO> getBookingById(@PathVariable Long id) {
         BookingDTO booking = bookingService.getBookingById(id);
@@ -50,18 +44,45 @@ public class BookingController {
     }
 
     @GetMapping("/user/{userId}")
-    @PreAuthorize("hasRole('STAFF') or #userId.toString() == authentication.principal")
-    @Operation(summary = "Get bookings by user ID (STAFF or own bookings)")
+    @Operation(summary = "Get bookings by user ID")
     public ResponseEntity<List<BookingDTO>> getBookingsByUserId(@PathVariable Long userId) {
         List<BookingDTO> bookings = bookingService.getBookingsByUserId(userId);
         return ResponseEntity.ok(bookings);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('STAFF', 'STUDENT')")
     @Operation(summary = "Delete booking (cancel)")
     public ResponseEntity<Void> deleteBooking(@PathVariable Long id) {
         bookingService.deleteBooking(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/approve")
+    @Operation(summary = "Approve booking (STAFF only)")
+    public ResponseEntity<BookingDTO> approveBooking(@PathVariable Long id) {
+        BookingDTO booking = bookingService.approveBooking(id);
+        return ResponseEntity.ok(booking);
+    }
+
+    @PutMapping("/{id}/reject")
+    @Operation(summary = "Reject booking with reason (STAFF only)")
+    public ResponseEntity<BookingDTO> rejectBooking(
+            @PathVariable Long id,
+            @RequestBody RejectRequest request) {
+        BookingDTO booking = bookingService.rejectBooking(id, request.getReason());
+        return ResponseEntity.ok(booking);
+    }
+
+    // Inner class for reject request
+    public static class RejectRequest {
+        private String reason;
+
+        public String getReason() {
+            return reason;
+        }
+
+        public void setReason(String reason) {
+            this.reason = reason;
+        }
     }
 }

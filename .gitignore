@@ -24,6 +24,11 @@ Thumbs.db
 *.env
 **/application-secret.properties
 
+# Documentation with sensitive info (DO NOT COMMIT)
+DATABASE_CONNECTION_FIX.md
+DATABASE_UPDATE_INSTRUCTIONS.md
+DEPLOYMENT_SUMMARY.md
+
 # Logs
 *.log
 logs/

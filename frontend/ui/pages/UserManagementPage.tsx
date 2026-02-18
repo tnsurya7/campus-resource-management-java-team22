@@ -229,10 +229,22 @@ export const UserManagementPage: React.FC = () => {
             {/* Users Table */}
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                 {isLoading ? (
-                    <div className="p-6 space-y-4">
-                        <SkeletonRow />
-                        <SkeletonRow />
-                        <SkeletonRow />
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead className="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                <SkeletonRow />
+                                <SkeletonRow />
+                                <SkeletonRow />
+                            </tbody>
+                        </table>
                     </div>
                 ) : filteredUsers.length === 0 ? (
                     <div className="text-center py-12">

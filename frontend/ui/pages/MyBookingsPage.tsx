@@ -206,8 +206,14 @@ export const MyBookingsPage: React.FC = () => {
                                             )}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                            {TIME_SLOT_INFO[booking.timeSlot].label}
-                                            <div className="text-xs text-gray-500">{TIME_SLOT_INFO[booking.timeSlot].time}</div>
+                                            {booking.timeSlot && TIME_SLOT_INFO[booking.timeSlot] 
+                                                ? TIME_SLOT_INFO[booking.timeSlot].label 
+                                                : (booking.timeSlot || 'Unknown')}
+                                            <div className="text-xs text-gray-500">
+                                                {booking.timeSlot && TIME_SLOT_INFO[booking.timeSlot]
+                                                    ? TIME_SLOT_INFO[booking.timeSlot].time
+                                                    : 'Legacy or unknown time slot'}
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}>

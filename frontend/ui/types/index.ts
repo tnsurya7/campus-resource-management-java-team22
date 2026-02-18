@@ -19,7 +19,7 @@ export interface User {
 }
 
 // Resource Types (matching backend exactly)
-export type ResourceType = 'LAB' | 'CLASSROOM' | 'EVENT_HALL';
+export type ResourceType = 'LAB' | 'CLASSROOM' | 'EVENT_HALL' | 'COMPUTER';
 export type ResourceStatus = 'AVAILABLE' | 'UNAVAILABLE' | 'MAINTENANCE';
 
 export interface Resource {
@@ -33,8 +33,8 @@ export interface Resource {
 }
 
 // Booking Types
-export type TimeSlot = 'MORNING' | 'AFTERNOON' | 'FULL_DAY';
-export type BookingStatus = 'PENDING' | 'APPROVED' | 'REJECTED'; // Frontend supports all, backend currently only APPROVED
+export type TimeSlot = 'MORNING' | 'AFTERNOON' | 'ONE_HOUR' | 'TWO_HOURS' | 'THREE_HOURS' | 'FOUR_HOURS' | 'FIVE_HOURS' | 'FULL_DAY';
+export type BookingStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
 export interface Booking {
     id: string;
@@ -53,9 +53,16 @@ export interface Booking {
 
 // Time Slot Definitions
 export const TIME_SLOT_INFO = {
-    MORNING: { label: 'Morning', time: '9:00 AM - 12:00 PM', hours: [9, 10, 11] },
-    AFTERNOON: { label: 'Afternoon', time: '12:00 PM - 4:00 PM', hours: [12, 13, 14, 15] },
-    FULL_DAY: { label: 'Full Day', time: '9:00 AM - 4:00 PM', hours: [9, 10, 11, 12, 13, 14, 15] },
+    // Legacy time slots (for backward compatibility)
+    MORNING: { label: 'Morning', time: 'Morning slot', hours: 3, forStudents: true, forStaff: true },
+    AFTERNOON: { label: 'Afternoon', time: 'Afternoon slot', hours: 4, forStudents: true, forStaff: true },
+    // New time slots
+    ONE_HOUR: { label: '1 Hour', time: '1 hour slot', hours: 1, forStudents: true, forStaff: true },
+    TWO_HOURS: { label: '2 Hours', time: '2 hour slot', hours: 2, forStudents: true, forStaff: true },
+    THREE_HOURS: { label: '3 Hours', time: '3 hour slot', hours: 3, forStudents: true, forStaff: true },
+    FOUR_HOURS: { label: '4 Hours', time: '4 hour slot', hours: 4, forStudents: false, forStaff: true },
+    FIVE_HOURS: { label: '5 Hours', time: '5 hour slot', hours: 5, forStudents: false, forStaff: true },
+    FULL_DAY: { label: 'Full Day', time: 'Full day (8+ hours)', hours: 8, forStudents: false, forStaff: true },
 } as const;
 
 // Validation Rules

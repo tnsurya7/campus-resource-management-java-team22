@@ -49,10 +49,15 @@ export const AllBookingsPage: React.FC = () => {
             return;
         }
 
+        if (rejectionReason.trim().length < 10) {
+            showToast('Rejection reason must be at least 10 characters', 'warning');
+            return;
+        }
+
         try {
             setIsSubmitting(true);
             await bookingsAPI.updateStatus(selectedBooking.id, 'REJECTED', rejectionReason);
-            showToast('Booking rejected', 'success');
+            showToast('Booking rejected with reason provided to student', 'success');
             setShowRejectModal(false);
             setRejectionReason('');
             loadBookings();
@@ -63,11 +68,19 @@ export const AllBookingsPage: React.FC = () => {
         }
     };
 
-    const handleDelete = async (id: string) => {
+    const handleDelete = async (booking: Booking) => {
+        // If booking is PENDING, require rejection first
+        if (booking.status === 'PENDING') {
+            showToast('Please reject the booking with a reason before deleting', 'warning');
+            setSelectedBooking(booking);
+            setShowRejectModal(true);
+            return;
+        }
+
         if (!confirm('Are you sure you want to delete this booking?')) return;
 
         try {
-            await bookingsAPI.delete(id);
+            await bookingsAPI.delete(booking.id);
             showToast('Booking deleted successfully', 'success');
             loadBookings();
         } catch (error) {
@@ -247,8 +260,14 @@ export const AllBookingsPage: React.FC = () => {
                                             {formatDate(booking.bookingDate)}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                            {TIME_SLOT_INFO[booking.timeSlot].label}
-                                            <div className="text-xs text-gray-500">{TIME_SLOT_INFO[booking.timeSlot].time}</div>
+                                            {booking.timeSlot && TIME_SLOT_INFO[booking.timeSlot] 
+                                                ? TIME_SLOT_INFO[booking.timeSlot].label 
+                                                : (booking.timeSlot || 'Unknown')}
+                                            <div className="text-xs text-gray-500">
+                                                {booking.timeSlot && TIME_SLOT_INFO[booking.timeSlot]
+                                                    ? TIME_SLOT_INFO[booking.timeSlot].time
+                                                    : 'Legacy or unknown time slot'}
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}>
@@ -279,7 +298,7 @@ export const AllBookingsPage: React.FC = () => {
                                                 </>
                                             )}
                                             <button
-                                                onClick={() => handleDelete(booking.id)}
+                                                onClick={() => handleDelete(booking)}
                                                 className="text-gray-600 hover:text-gray-800 font-medium"
                                             >
                                                 Delete
@@ -304,10 +323,22 @@ export const AllBookingsPage: React.FC = () => {
                 title="Reject Booking"
             >
                 <div className="space-y-4">
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                        <p className="text-sm text-yellow-800">
+                            ⚠️ You must provide a valid reason for rejecting this booking. The student will see this reason.
+                        </p>
+                    </div>
+
                     <div>
                         <p className="text-sm text-gray-600 mb-2">Booking Details</p>
                         <p className="font-medium text-gray-900">{selectedBooking?.resourceName}</p>
-                        <p className="text-sm text-gray-600">{selectedBooking?.userName}</p>
+                        <p className="text-sm text-gray-600">Student: {selectedBooking?.userName}</p>
+                        <p className="text-sm text-gray-600">
+                            Date: {selectedBooking?.bookingDate} | 
+                            Time: {selectedBooking?.timeSlot && TIME_SLOT_INFO[selectedBooking.timeSlot] 
+                                ? TIME_SLOT_INFO[selectedBooking.timeSlot].label 
+                                : selectedBooking?.timeSlot}
+                        </p>
                     </div>
 
                     <div>
@@ -318,9 +349,12 @@ export const AllBookingsPage: React.FC = () => {
                             value={rejectionReason}
                             onChange={(e) => setRejectionReason(e.target.value)}
                             rows={4}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                            placeholder="Please provide a reason for rejection..."
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                            placeholder="Example: Resource needed for urgent maintenance, Already booked for department event, etc."
                         />
+                        <p className="text-xs text-gray-500 mt-1">
+                            Minimum 10 characters required
+                        </p>
                     </div>
 
                     <div className="flex gap-3 pt-4">
@@ -337,7 +371,7 @@ export const AllBookingsPage: React.FC = () => {
                         <Button
                             onClick={handleReject}
                             className="flex-1 bg-red-600 text-white hover:bg-red-700"
-                            disabled={isSubmitting || !rejectionReason.trim()}
+                            disabled={isSubmitting || rejectionReason.trim().length < 10}
                         >
                             {isSubmitting ? <Spinner size="sm" /> : 'Reject Booking'}
                         </Button>

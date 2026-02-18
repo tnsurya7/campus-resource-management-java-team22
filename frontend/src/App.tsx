@@ -134,7 +134,7 @@ function AppContent() {
             return user?.role === 'student' ? (
                 <StudentDashboard onNavigate={handleNavigate} />
             ) : (
-                <StaffDashboard />
+                <StaffDashboard onNavigate={handleNavigate} />
             );
         }
 
