@@ -1,196 +1,148 @@
-# ✅ Deployment Summary
+# 🚀 Deployment Summary - Campus Resource Management System
 
-## 🎉 Successfully Pushed to GitHub!
+## ✅ Deployment Status: LIVE
 
-**Repository**: campus-resource-management-java-team22
-**Commit**: feat: Add enterprise JWT security and remove hardcoded credentials
+### Frontend (Vercel)
+- **URL**: https://campus-resource-management-java-tea.vercel.app
+- **Status**: ✅ Deployed and Running
+- **Framework**: React + TypeScript + Vite
+- **Build**: 285.84 kB (79.49 kB gzipped)
 
----
-
-## 🔒 Security Cleanup Complete
-
-### ✅ What Was Done
-
-1. **Removed All Hardcoded Credentials**
-   - Database credentials removed from `application.properties`
-   - JWT secret now uses environment variables
-   - All credentials replaced with placeholders in `.env.example`
-
-2. **Added Security Documentation**
-   - Created `SECURITY_SETUP.md` with comprehensive setup instructions
-   - Updated `README.md` with security best practices
-   - Added `.gitignore` to prevent credential leaks
-
-3. **Cleaned Up Documentation**
-   - Removed 20+ temporary MD files
-   - Kept only essential documentation:
-     - `README.md` - Main project documentation
-     - `SECURITY_SETUP.md` - Security configuration guide
-
-4. **Implemented Enterprise Security**
-   - JWT authentication with Spring Security
-   - Role-based access control
-   - Password hashing with BCrypt
-   - Rate limiting and account lockout
-   - Soft delete with audit trails
+### Backend (Render - Docker)
+- **URL**: https://crms-backend-zl51.onrender.com
+- **Status**: ✅ Deployed and Running
+- **Runtime**: Java 17 + Spring Boot 3.2.0
+- **Database**: Connected to Supabase PostgreSQL
 
 ---
 
-## 📋 Files in Repository
+## 🔧 Required Configuration Steps
 
-### Root Level
-- `README.md` - Main documentation
-- `SECURITY_SETUP.md` - Security setup guide
-- `.gitignore` - Protects sensitive files
+### 1. Update Vercel Environment Variable
+Go to Vercel Dashboard → Your Project → Settings → Environment Variables
 
-### Backend
-- Complete Spring Boot application
-- JWT security implementation
-- Environment variable configuration
-- `.env.example` - Template for credentials
+**Add/Update:**
+```
+VITE_API_URL=https://crms-backend-zl51.onrender.com
+```
 
-### Frontend
-- React + TypeScript application
-- JWT token handling
-- Responsive UI with Tailwind CSS
+Then redeploy the frontend.
 
----
+### 2. Redeploy Backend (CORS Update)
+The backend CORS configuration has been updated to allow your Vercel URL.
 
-## 🚀 Next Steps for Team Members
-
-### 1. Clone the Repository
+**Push the changes:**
 ```bash
-git clone https://github.com/tnsurya7/campus-resource-management-java-team22.git
-cd campus-resource-management-java-team22
+git add backend/src/main/java/com/ksr/crms/security/SecurityConfig.java
+git commit -m "Update CORS for Vercel frontend"
+git push origin main
 ```
 
-### 2. Set Up Environment Variables
+Render will automatically redeploy.
+
+### 3. Run Database Migrations
+Go to Supabase Dashboard → SQL Editor → New Query
+
+**Run these scripts IN ORDER:**
+
+#### a) Update Booking Schema
+```sql
+-- Copy and paste contents from: database-update.sql
+```
+
+#### b) Add Admin Role
+```sql
+-- Copy and paste contents from: database-admin-role.sql
+```
+
+#### c) Migrate Passwords to BCrypt
+```sql
+-- Copy and paste contents from: database-password-migration.sql
+```
+
+---
+
+## 🧪 Testing the Deployment
+
+### 1. Test Backend Health
 ```bash
-cd backend
-cp .env.example .env
-# Edit .env with your database credentials
+curl https://crms-backend-zl51.onrender.com/
 ```
 
-### 3. Run the Application
-```bash
-# Backend
-cd backend
-mvn spring-boot:run
+Expected: Welcome message
 
-# Frontend (in new terminal)
-cd frontend
-npm install
-npm run dev
-```
+### 2. Test Frontend
+Visit: https://campus-resource-management-java-tea.vercel.app
+
+### 3. Test Login (After Database Migrations)
+**Admin:**
+- Email: admin@crms.com
+- Password: admin123
+
+**Staff:**
+- Email: staff@test.com
+- Password: test123
+
+**Student:**
+- Email: student@test.com
+- Password: test123
 
 ---
 
-## 🔐 Important Security Notes
+## 📋 Post-Deployment Checklist
 
-### ⚠️ NEVER Commit These Files:
-- `backend/.env` - Contains real credentials
-- Any file with real passwords or secrets
-- Database connection strings with credentials
-
-### ✅ Safe to Commit:
-- `backend/.env.example` - Template with placeholders
-- `application.properties` - Uses environment variables
-- All code files
-- Documentation files
-
----
-
-## 📊 What's in the Repository
-
-### Backend Features
-- ✅ Spring Boot 3.2.0
-- ✅ JWT Authentication
-- ✅ Spring Security
-- ✅ Role-based access control
-- ✅ PostgreSQL database
-- ✅ RESTful API
-- ✅ Swagger/OpenAPI documentation
-- ✅ Pagination support
-- ✅ Error handling with error codes
-
-### Frontend Features
-- ✅ React 18 + TypeScript
-- ✅ JWT token management
-- ✅ Role-based UI (STAFF/STUDENT)
-- ✅ Responsive design
-- ✅ Tailwind CSS v3
-- ✅ Form validation
-- ✅ Toast notifications
-
-### Security Features
-- ✅ JWT stateless authentication
-- ✅ BCrypt password hashing
-- ✅ Rate limiting (3 attempts)
-- ✅ Account lockout (15 min)
-- ✅ Soft delete
-- ✅ Database indexes
-- ✅ CORS configuration
-- ✅ Input validation
+- [ ] Update VITE_API_URL in Vercel
+- [ ] Redeploy Vercel frontend
+- [ ] Push CORS changes to GitHub
+- [ ] Wait for Render backend redeploy
+- [ ] Run database-update.sql in Supabase
+- [ ] Run database-admin-role.sql in Supabase
+- [ ] Run database-password-migration.sql in Supabase
+- [ ] Test login with all three roles
+- [ ] Test booking creation (Student)
+- [ ] Test booking approval (Admin)
+- [ ] Test resource management (Admin)
+- [ ] Verify JWT token expiry (30 minutes)
 
 ---
 
-## 🧪 Testing the Application
+## 🔐 Security Notes
 
-### 1. Access Swagger UI
-```
-http://localhost:8080/swagger-ui/index.html
-```
+1. **Change Default Passwords**: After first login, change all test passwords
+2. **Environment Variables**: Never commit .env files
+3. **JWT Secret**: Stored securely in Render environment variables
+4. **Database Credentials**: Stored in backend/.env (gitignored)
 
-### 2. Register a New User
-- Go to frontend: http://localhost:5173
-- Click "Create Account"
-- Fill in details and register
+---
 
-### 3. Login
-- Use registered credentials
-- JWT token will be stored automatically
+## 🐛 Troubleshooting
 
-### 4. Test Features
-- STAFF: Full access to all features
-- STUDENT: Limited to own bookings
+### CORS Errors
+- Ensure Vercel environment variable is set correctly
+- Verify backend CORS includes Vercel URL
+- Check browser console for specific error
+
+### Login Fails
+- Verify database migrations ran successfully
+- Check if passwords are BCrypt hashed
+- Confirm JWT_SECRET is set in Render
+
+### Backend Not Responding
+- Check Render logs for errors
+- Verify database connection in Render environment variables
+- Ensure PORT environment variable is set
 
 ---
 
 ## 📞 Support
 
-If you encounter issues:
-
-1. **Check `SECURITY_SETUP.md`** for configuration help
-2. **Verify environment variables** are set correctly
-3. **Check backend logs** for errors
-4. **Review Swagger documentation** for API details
+For issues, check:
+1. Render logs: https://dashboard.render.com
+2. Vercel logs: https://vercel.com/dashboard
+3. Supabase logs: https://supabase.com/dashboard
 
 ---
 
-## 🎓 Project Highlights
-
-- **Enterprise-grade security** with JWT
-- **Production-ready architecture**
-- **Clean, maintainable code**
-- **Comprehensive documentation**
-- **No hardcoded credentials**
-- **Best practices followed**
-
----
-
-## ✅ Verification Checklist
-
-- [x] All credentials removed from code
-- [x] Environment variables configured
-- [x] `.gitignore` protecting sensitive files
-- [x] Documentation updated
-- [x] Security guide created
-- [x] Code pushed to GitHub
-- [x] No credentials in repository
-- [x] Ready for team collaboration
-
----
-
-**Status: ✅ Production-Ready and Secure!**
-
-Built with ❤️ by Team 22
+**Last Updated**: February 20, 2026
+**Deployment Type**: Production
+**Status**: Awaiting final configuration steps
