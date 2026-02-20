@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { User, Resource, Booking, ResourceType, TimeSlot, BookingStatus } from '../types';
 
-// Backend API base URL - uses environment variable or defaults to localhost
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+// Backend API base URL - uses environment variable or defaults to production backend
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://crms-backend-zl51.onrender.com';
 
 // Create axios instance with default config
 const apiClient = axios.create({
