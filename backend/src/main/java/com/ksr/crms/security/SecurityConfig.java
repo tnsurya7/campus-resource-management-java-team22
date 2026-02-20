@@ -32,8 +32,9 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Public endpoints
-                .requestMatchers("/", "/auth/**", "/users/register", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                // Public endpoints (order matters - specific before general)
+                .requestMatchers("/", "/auth/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                .requestMatchers("POST", "/users").permitAll() // Allow user registration
                 // Admin only endpoints
                 .requestMatchers("/users/**").hasRole("ADMIN")
                 .requestMatchers("/resources/**").hasAnyRole("ADMIN", "STAFF", "STUDENT")
