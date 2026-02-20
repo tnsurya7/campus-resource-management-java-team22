@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { User, Resource, Booking, ResourceType, TimeSlot, BookingStatus } from '../types';
 
-// Backend API base URL
-const API_BASE_URL = 'http://localhost:8080';
+// Backend API base URL - uses environment variable or defaults to localhost
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 // Create axios instance with default config
 const apiClient = axios.create({
@@ -13,7 +13,19 @@ const apiClient = axios.create({
     withCredentials: true,
 });
 
-// No JWT token needed anymore - removed authentication interceptor
+// Request interceptor to add JWT token to headers
+apiClient.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('jwt_token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
 
 // Response interceptor for error handling
 apiClient.interceptors.response.use(
@@ -93,13 +105,17 @@ export const authAPI = {
                 password
             });
             
-            // Backend now returns just the user object (no JWT token)
-            const user = mapBackendUser(response.data);
+            // Backend now returns { token, user }
+            const { token, user: backendUser } = response.data;
+            const user = mapBackendUser(backendUser);
             
             // Verify role matches
             if (user.role !== role) {
                 throw new Error('Invalid credentials');
             }
+            
+            // Store JWT token in localStorage
+            localStorage.setItem('jwt_token', token);
             
             return user;
         } catch (error) {
@@ -309,7 +325,7 @@ export const usersAPI = {
 
 // Stats API
 export const statsAPI = {
-    getStats: async (role: 'student' | 'staff', userId: string) => {
+    getStats: async (role: 'student' | 'staff' | 'admin', userId: string) => {
         try {
             const response = await apiClient.get('/dashboard/stats');
             const stats = response.data;
@@ -331,7 +347,7 @@ export const statsAPI = {
                     pendingBookings: pendingBookings.length,
                 };
             } else {
-                // Staff stats from backend
+                // Staff and Admin stats from backend
                 const users = await usersAPI.getAll();
                 const activeStudents = users.filter(u => u.role === 'student' && u.status === 'active');
                 

@@ -44,7 +44,14 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ onNavigate }
 
             // Load recent bookings
             const bookingsData = await bookingsAPI.getByUser(user!.id);
-            setRecentBookings(bookingsData.slice(0, 5) as RecentBooking[]);
+            const mappedBookings: RecentBooking[] = bookingsData.slice(0, 5).map(b => ({
+                id: b.id,
+                resourceName: b.resourceName,
+                date: b.bookingDate,
+                timeSlot: b.timeSlot,
+                status: b.status.toLowerCase() as 'pending' | 'approved' | 'rejected'
+            }));
+            setRecentBookings(mappedBookings);
         } catch (error) {
             showToast('Failed to load dashboard data', 'error');
         } finally {
