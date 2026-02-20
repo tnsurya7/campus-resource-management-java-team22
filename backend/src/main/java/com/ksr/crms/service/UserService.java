@@ -6,11 +6,11 @@ import com.ksr.crms.entity.User;
 import com.ksr.crms.exception.ConflictException;
 import com.ksr.crms.exception.ResourceNotFoundException;
 import com.ksr.crms.exception.UnauthorizedException;
-import com.ksr.crms.exception.ValidationException;
 import com.ksr.crms.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,9 +22,11 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
@@ -36,7 +38,7 @@ public class UserService {
         User user = new User();
         user.setName(userDTO.getName());
         user.setEmail(userDTO.getEmail());
-        user.setPassword(userDTO.getPassword()); // Store password as-is (no hashing)
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword())); // Hash password with BCrypt
         user.setPhone(userDTO.getPhone());
         user.setRole(userDTO.getRole());
         user.setStatus(userDTO.getStatus() != null ? userDTO.getStatus() : User.Status.ACTIVE);
@@ -100,7 +102,7 @@ public class UserService {
 
         // Only update password if provided
         if (userDTO.getPassword() != null && !userDTO.getPassword().trim().isEmpty()) {
-            user.setPassword(userDTO.getPassword());
+            user.setPassword(passwordEncoder.encode(userDTO.getPassword())); // Hash password
         }
 
         User updatedUser = userRepository.save(user);
@@ -118,7 +120,7 @@ public class UserService {
         userRepository.save(user);
     }
 
-    // Simple authentication without password hashing
+    // Authentication with BCrypt password verification
     @Transactional
     public UserDTO authenticate(String email, String password) {
         User user = userRepository.findByEmail(email)
@@ -129,8 +131,8 @@ public class UserService {
             throw new UnauthorizedException("Account not found");
         }
 
-        // Simple password check (no hashing)
-        if (user.getPassword() == null || !user.getPassword().equals(password)) {
+        // Verify password with BCrypt
+        if (user.getPassword() == null || !passwordEncoder.matches(password, user.getPassword())) {
             throw new UnauthorizedException("Invalid credentials");
         }
 
