@@ -3,7 +3,7 @@
 ## ✅ Deployment Status: LIVE
 
 ### Frontend (Vercel)
-- **URL**: https://campus-resource-management-java-tea.vercel.app
+- **URL**: https://crms-java.vercel.app (or https://campus-resource-management-java-tea.vercel.app)
 - **Status**: ✅ Deployed and Running
 - **Framework**: React + TypeScript + Vite
 - **Build**: 285.84 kB (79.49 kB gzipped)
@@ -28,17 +28,12 @@ VITE_API_URL=https://crms-backend-zl51.onrender.com
 
 Then redeploy the frontend.
 
-### 2. Redeploy Backend (CORS Update)
-The backend CORS configuration has been updated to allow your Vercel URL.
+### 2. Redeploy Backend (JWT Files Added)
+The JWT security files have been added to Git and pushed.
 
-**Push the changes:**
-```bash
-git add backend/src/main/java/com/ksr/crms/security/SecurityConfig.java
-git commit -m "Update CORS for Vercel frontend"
-git push origin main
-```
+**Status**: Render is automatically redeploying now (check dashboard)
 
-Render will automatically redeploy.
+Wait for the build to complete (~2-3 minutes).
 
 ### 3. Run Database Migrations
 Go to Supabase Dashboard → SQL Editor → New Query
@@ -72,7 +67,7 @@ curl https://crms-backend-zl51.onrender.com/
 Expected: Welcome message
 
 ### 2. Test Frontend
-Visit: https://campus-resource-management-java-tea.vercel.app
+Visit: https://crms-java.vercel.app
 
 ### 3. Test Login (After Database Migrations)
 **Admin:**
